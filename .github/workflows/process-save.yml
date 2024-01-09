@@ -26,18 +26,19 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r python/requirements.txt
 
-    - name: Change directory
-      run: |
-        cd python
 
     - name: Run script
       run: |
         FILE=$(ls saves | head -n 1)
-        python parseEU4.py -f "../saves/$FILE"
+        mv saves/$FILE python/process.eu4
+        cd python
+        python parseEU4.py -f "process.eu4"
+        rm process.eu4
+        cd ../
 
     - name: Move JSON file
       run: |
-        mv parsed_data.json docs/assets/parsed_data.json
+        mv python/parsed_data.json docs/assets/parsed_data.json
 
     - name: Commit and push changes
       run: |
