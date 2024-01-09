@@ -71,13 +71,13 @@ export class AppComponent implements AfterViewInit {
   }
 
   sortData(sort: Sort) {
-    const data = this.filteredCountries.slice();
+    const data = this.countries.slice();
     if (!sort.active || sort.direction === '') {
       this.countries = data;
       return;
     }
 
-    this.countries = data.sort((a, b) => {
+    data.sort((a, b) => {
       const isAsc = sort.direction === 'asc';
       switch (sort.active) {
         case 'country_name':
@@ -126,7 +126,9 @@ export class AppComponent implements AfterViewInit {
           return 0;
       }
     });
-    this.dataSource = new MatTableDataSource<Country>(data);
+    this.filteredCountries = data.filter((x: any) => (
+      x.player != '' || !this.filter.player));
+    this.dataSource = new MatTableDataSource<Country>(this.filteredCountries);
     this.dataSource.paginator = this.paginator;
   }
 }
