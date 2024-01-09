@@ -238,7 +238,7 @@ with open(os.path.join(folder_name, 'parsed_gamestate'), 'r', encoding='utf-8') 
 		avg_monarch[2] += (days * float(monarchs[-1][2]))
 		avg_monarch_stats = [round(i / float((current_date - game_start).days), 3) for i in avg_monarch]
 
-		country_data['avg_monarch'] = str('%.3f' % sum(avg_monarch_stats)) + '<br>' + '/'.join(str(v) for v in avg_monarch_stats)
+		country_data['avg_monarch'] = str('%.2f' % sum(avg_monarch_stats)) + '<br>' + '/'.join(str(v) for v in avg_monarch_stats)
 		country_data['income'] = round(country_json.get('estimated_monthly_income'), 2)
 		country_data['provinces'] = len(country_json.get('owned_provinces'))
 		
@@ -257,13 +257,13 @@ with open(os.path.join(folder_name, 'parsed_gamestate'), 'r', encoding='utf-8') 
 
 		country_data['num_buildings'] = num_buildings
 		country_data['buildings_value'] = buildings_value
-		country_data['buildings_per_province'] = round(float(num_buildings) / country_data['provinces'], 3)
+		country_data['buildings_per_province'] = round(float(num_buildings) / country_data['provinces'], 2)
 		#country_data['avg_buildings_value'] = round(buildings_value / max(num_buildings, 1), 3)
 
-		country_data['inno'] = country_json.get('innovativeness') or 0.0
-		country_data['absolutism'] = country_json.get('absolutism') or 0.0
-		country_data['avg_dev'] = round(country_data['total_dev'] / country_data['provinces'], 3)
-		country_data['avg_dev_real'] = round(country_data['real_dev'] / country_data['provinces'], 3)
+		country_data['inno'] = round(country_json.get('innovativeness') or 0.0, 2)
+		country_data['absolutism'] = int(country_json.get('absolutism') or 0)
+		country_data['avg_dev'] = round(country_data['total_dev'] / country_data['provinces'], 2)
+		country_data['avg_dev_real'] = round(country_data['real_dev'] / country_data['provinces'], 2)
 		country_data['player'] = ''
 		if country_json.get('human'):
 			country_data['player'] = list(players.keys())[list(players.values()).index(country)]

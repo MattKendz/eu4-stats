@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Sort, MatSort, MatSortModule } from '@angular/material/sort';
-import { RouterOutlet } from '@angular/router';
+import { BrowserModule, Title } from '@angular/platform-browser';
+import { RouterModule, Routes } from '@angular/router';
 import countryData from '../assets/parsed_data.json';
 
 interface Country {
@@ -36,7 +37,7 @@ interface Country {
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
-  imports: [CommonModule, FormsModule, RouterOutlet, MatTableModule, MatSortModule, MatPaginatorModule],
+  imports: [CommonModule, FormsModule, RouterModule, MatTableModule, MatSortModule, MatPaginatorModule],
   standalone: true,
 })
 
@@ -51,7 +52,13 @@ export class AppComponent implements AfterViewInit {
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
+  public constructor(private titleService: Title) {
+    this.titleService.setTitle("EU4 Stats");
+  }
+
   ngAfterViewInit() {
+    this.filteredCountries = this.countries.filter((x: any) => (
+      x.player != '' || !this.filter.player));
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
   }
