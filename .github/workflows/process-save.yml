@@ -31,6 +31,7 @@ jobs:
       run: |
         FILE=$(ls saves | head -n 1)
         mv saves/$FILE python/process.eu4
+        : # Jesus why I gotta run this in here
         cd python
         python parseEU4.py -f "process.eu4"
         rm process.eu4
