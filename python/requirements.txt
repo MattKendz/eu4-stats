@@ -1,0 +1,2 @@
+ClauseWizard==1.0.4
+pyparsing==3.1.1
