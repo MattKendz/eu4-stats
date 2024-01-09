@@ -1,0 +1,30 @@
+body {
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  margin: 0;
+  padding: 10px;
+}
+
+.demo-table {
+  width: 100%;
+}
+
+.mat-column-country_name {
+  font-weight: bold;
+}
+
+.mat-mdc-row:nth-child(odd) {
+  background-color: #FFFFFF;
+}
+
+.mat-mdc-row:nth-child(even) {
+  background-color: #EEE;
+}
+
+.mat-mdc-cell {
+    text-align: center;
+    flex: 0 0 10%;
+}
+
+.td:first-child {
+    position: sticky;
+}

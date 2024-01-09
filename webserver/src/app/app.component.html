@@ -1,0 +1,120 @@
+<input type="checkbox" [(ngModel)]="filter.player" (ngModelChange)="filterChange()" /> Filter Players Only
+<table mat-table matSort (matSortChange)="sortData($event)" matSortActive="total_dev" matSortDirection="desc" matSortDisableClear [dataSource]="dataSource" class="mat-elevation-z8 demo-table">  
+  <ng-container matColumnDef="country_name" sticky>
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
+    <td mat-cell *matCellDef="let country"> {{country.country_name}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="total_dev">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Total Dev </th>
+    <td mat-cell *matCellDef="let country"> {{country.total_dev}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="real_dev">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Real Dev </th>
+    <td mat-cell *matCellDef="let country"> {{country.real_dev}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="gp_score">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> GP Score </th>
+    <td mat-cell *matCellDef="let country"> {{country.gp_score}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="total_mana">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Total Mana Generated </th>
+    <td mat-cell *matCellDef="let country"><div [innerHTML]="country.total_mana"></div></td>
+  </ng-container>
+
+  <ng-container matColumnDef="tech">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Tech </th>
+    <td mat-cell *matCellDef="let country"> {{country.tech}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="total_ideas">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Ideas </th>
+    <td mat-cell *matCellDef="let country"> {{country.total_ideas}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="curr_manpower">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Current Manpower </th>
+    <td mat-cell *matCellDef="let country"> {{country.curr_manpower}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="max_manpower">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Max Manpower </th>
+    <td mat-cell *matCellDef="let country"> {{country.max_manpower}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="avg_monarch">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Avg. Monarch </th>
+    <td mat-cell *matCellDef="let country"><div [innerHTML]="country.avg_monarch"></div></td>
+  </ng-container>
+
+  <ng-container matColumnDef="income">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Income </th>
+    <td mat-cell *matCellDef="let country"> {{country.income}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="provinces">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Provinces </th>
+    <td mat-cell *matCellDef="let country"> {{country.provinces}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="num_buildings">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Num. Buildings </th>
+    <td mat-cell *matCellDef="let country"> {{country.num_buildings}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="buildings_value">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Buildings Value </th>
+    <td mat-cell *matCellDef="let country"> {{country.buildings_value}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="buildings_per_province">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Buildings per Province </th>
+    <td mat-cell *matCellDef="let country"> {{country.buildings_per_province}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="inno">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Innovativeness </th>
+    <td mat-cell *matCellDef="let country"> {{country.inno}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="absolutism">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Absolutism </th>
+    <td mat-cell *matCellDef="let country"> {{country.absolutism}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="avg_dev">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Avg. Dev </th>
+    <td mat-cell *matCellDef="let country"> {{country.avg_dev}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="avg_dev_real">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Avg. Dev (Real) </th>
+    <td mat-cell *matCellDef="let country"> {{country.avg_dev_real}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="army_professionalism">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Army Professionalism </th>
+    <td mat-cell *matCellDef="let country"> {{country.army_professionalism}} </td>
+  </ng-container>
+
+  <ng-container matColumnDef="player">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> Player </th>
+    <td mat-cell *matCellDef="let country"> {{country.player}} </td>
+  </ng-container>
+
+  <!-- <ng-container matColumnDef="{{column}}" *ngFor="let column of displayedColumns">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header> {{column}} </th>
+    <td mat-cell *matCellDef="let country"> {{country[column]}} </td>
+  </ng-container> -->
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>
+
+<mat-paginator [pageSizeOptions]="[25, 50, 100]"
+                 showFirstLastButtons
+                 aria-label="Select page of countries">
+</mat-paginator>
