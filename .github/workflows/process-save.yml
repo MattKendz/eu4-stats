@@ -1,0 +1,50 @@
+name: Run Python script and update GitHub Pages
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r python/requirements.txt
+
+    - name: Run script
+      run: |
+        FILE=$(ls saves | head -n 1)
+        python python/parseEU4.py -f "saves/$FILE"
+
+    - name: Move JSON file
+      run: |
+        mv parsed_data.json docs/assets/parsed_data.json
+
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add docs/assets/parsed_data.json
+        git commit -m "Update parsed_data.json" -a
+        git push
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs
