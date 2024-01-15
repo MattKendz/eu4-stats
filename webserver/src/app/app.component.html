@@ -2,17 +2,17 @@
 <table mat-table matSort (matSortChange)="sortData($event)" matSortActive="total_dev" matSortDirection="desc" matSortStart="desc" matSortDisableClear [dataSource]="dataSource" class="mat-elevation-z8 demo-table">  
   <ng-container matColumnDef="country_name" sticky>
     <th mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
-    <td mat-cell *matCellDef="let country"> {{country.country_name}} </td>
+    <td mat-cell *matCellDef="let country"> {{country.name}} </td>
   </ng-container>
 
   <ng-container matColumnDef="total_dev">
     <th mat-header-cell *matHeaderCellDef mat-sort-header> Total Dev </th>
-    <td mat-cell *matCellDef="let country"> {{country.total_dev}} </td>
+    <td mat-cell *matCellDef="let country"> {{country.total_development}} </td>
   </ng-container>
 
   <ng-container matColumnDef="real_dev">
     <th mat-header-cell *matHeaderCellDef mat-sort-header> Real Dev </th>
-    <td mat-cell *matCellDef="let country"> {{country.real_dev}} </td>
+    <td mat-cell *matCellDef="let country"> {{country.real_development}} </td>
   </ng-container>
 
   <ng-container matColumnDef="gp_score">
@@ -22,12 +22,12 @@
 
   <ng-container matColumnDef="total_mana">
     <th mat-header-cell *matHeaderCellDef mat-sort-header> Total Mana Generated </th>
-    <td mat-cell *matCellDef="let country"><div [innerHTML]="country.total_mana"></div></td>
+    <td mat-cell *matCellDef="let country"> {{country.powers_earned[0] + country.powers_earned[1] + country.powers_earned[2]}} <br> {{country.powers_earned[0]}}/{{country.powers_earned[1]}}/{{country.powers_earned[2]}} </td>
   </ng-container>
 
   <ng-container matColumnDef="tech">
     <th mat-header-cell *matHeaderCellDef mat-sort-header> Tech </th>
-    <td mat-cell *matCellDef="let country"> {{country.tech}} </td>
+    <td mat-cell *matCellDef="let country"> {{country.technology[0]}}/{{country.technology[1]}}/{{country.technology[2]}} </td>
   </ng-container>
 
   <ng-container matColumnDef="total_ideas">
@@ -37,7 +37,7 @@
 
   <ng-container matColumnDef="curr_manpower">
     <th mat-header-cell *matHeaderCellDef mat-sort-header> Current Manpower </th>
-    <td mat-cell *matCellDef="let country"> {{country.curr_manpower}} </td>
+    <td mat-cell *matCellDef="let country"> {{country.current_manpower}} </td>
   </ng-container>
 
   <ng-container matColumnDef="max_manpower">
@@ -47,7 +47,7 @@
 
   <ng-container matColumnDef="avg_monarch">
     <th mat-header-cell *matHeaderCellDef mat-sort-header> Avg. Monarch </th>
-    <td mat-cell *matCellDef="let country"><div [innerHTML]="country.avg_monarch"></div></td>
+    <td mat-cell *matCellDef="let country"> {{country.average_monarch[0]}}/{{country.average_monarch[1]}}/{{country.average_monarch[2]}} </td>
   </ng-container>
 
   <ng-container matColumnDef="income">
@@ -57,12 +57,12 @@
 
   <ng-container matColumnDef="provinces">
     <th mat-header-cell *matHeaderCellDef mat-sort-header> Provinces </th>
-    <td mat-cell *matCellDef="let country"> {{country.provinces}} </td>
+    <td mat-cell *matCellDef="let country"> {{country.number_provinces}} </td>
   </ng-container>
 
   <ng-container matColumnDef="num_buildings">
     <th mat-header-cell *matHeaderCellDef mat-sort-header> Num. Buildings </th>
-    <td mat-cell *matCellDef="let country"> {{country.num_buildings}} </td>
+    <td mat-cell *matCellDef="let country"> {{country.number_buildings}} </td>
   </ng-container>
 
   <ng-container matColumnDef="buildings_value">
@@ -77,7 +77,7 @@
 
   <ng-container matColumnDef="inno">
     <th mat-header-cell *matHeaderCellDef mat-sort-header> Innovativeness </th>
-    <td mat-cell *matCellDef="let country"> {{country.inno}} </td>
+    <td mat-cell *matCellDef="let country"> {{country.innovativeness}} </td>
   </ng-container>
 
   <ng-container matColumnDef="absolutism">
@@ -87,12 +87,12 @@
 
   <ng-container matColumnDef="avg_dev">
     <th mat-header-cell *matHeaderCellDef mat-sort-header> Avg. Dev </th>
-    <td mat-cell *matCellDef="let country"> {{country.avg_dev}} </td>
+    <td mat-cell *matCellDef="let country"> {{country.average_development}} </td>
   </ng-container>
 
   <ng-container matColumnDef="avg_dev_real">
     <th mat-header-cell *matHeaderCellDef mat-sort-header> Avg. Dev (Real) </th>
-    <td mat-cell *matCellDef="let country"> {{country.avg_dev_real}} </td>
+    <td mat-cell *matCellDef="let country"> {{country.average_development_real}} </td>
   </ng-container>
 
   <ng-container matColumnDef="army_professionalism">
