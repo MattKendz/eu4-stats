@@ -8,29 +8,34 @@ import { BrowserModule, Title } from '@angular/platform-browser';
 import { RouterModule, Routes } from '@angular/router';
 import countryData from '../assets/parsed_data.json';
 
+interface Countries {
+  countries: Country[];
+}
+
 interface Country {
-  tag: String;
-  total_dev: Number;
-  real_dev: Number;
-  gp_score: Number;
-  total_mana: String;
-  tech: String;
-  total_ideas: Number;
-  curr_manpower: Number;
-  max_manpower: Number;
-  avg_monarch: String;
-  income: Number;
-  provinces: Number;
-  num_buildings: Number;
-  buildings_value: Number;
-  buildings_per_province: Number;
-  inno: Number;
-  absolutism: Number;
-  avg_dev: Number;
-  avg_dev_real: Number;
-  player: String;
-  army_professionalism: Number;
-  country_name: String;
+  tag: string;
+  name: string;
+  total_development: number;
+  real_development: number;
+  gp_score: number;
+  powers_earned: number[];
+  technology: number[];
+  ideas: any[];
+  total_ideas: number;
+  current_manpower: number;
+  max_manpower: number;
+  average_monarch: number[];
+  income: number;
+  number_provinces: number;
+  number_buildings: number;
+  buildings_value: number;
+  buildings_per_province: number;
+  innovativeness: number;
+  absolutism: number;
+  average_development: number;
+  average_development_real: number;
+  player: any;
+  army_professionalism: number;
 }
 
 @Component({
@@ -46,8 +51,8 @@ export class AppComponent implements AfterViewInit {
   displayedColumns: string[] = ['country_name', 'total_dev', 'real_dev', 'gp_score', 'total_mana', 'tech', 'total_ideas', 'curr_manpower', 'max_manpower', 'avg_monarch', 'income', 'provinces', 'num_buildings', 'buildings_value', 'buildings_per_province', 'inno', 'absolutism', 'avg_dev', 'avg_dev_real', 'army_professionalism', 'player'];
   filter = {player: false};
   filteredCountries: Country[] = [];
-  countries: Country[] = countryData;
-  dataSource = new MatTableDataSource<Country>(countryData)
+  countries: Country[] = countryData.countries;
+  dataSource = new MatTableDataSource<Country>(countryData.countries)
 
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -65,7 +70,7 @@ export class AppComponent implements AfterViewInit {
 
   filterChange() {
     this.filteredCountries = this.countries.filter((x: any) => (
-      x.player != '' || !this.filter.player));
+      x.player != null || !this.filter.player));
     this.dataSource = new MatTableDataSource<Country>(this.filteredCountries);
     this.dataSource.paginator = this.paginator;
   }
@@ -81,43 +86,43 @@ export class AppComponent implements AfterViewInit {
       const isAsc = sort.direction === 'asc';
       switch (sort.active) {
         case 'country_name':
-          return compare(a.country_name, b.country_name, isAsc);
+          return compare(a.name, b.name, isAsc);
         case 'total_dev':
-          return compare(a.total_dev, b.total_dev, isAsc);
+          return compare(a.total_development, b.total_development, isAsc);
         case 'real_dev':
-          return compare(a.real_dev, b.real_dev, isAsc);
+          return compare(a.real_development, b.real_development, isAsc);
         case 'gp_score':
           return compare(a.gp_score, b.gp_score, isAsc);
         case 'total_mana':
-          return compareWithBreaks(a.total_mana, b.total_mana, isAsc);
+          return compareTotal(a.powers_earned, b.powers_earned, isAsc);
         case 'tech':
-          return compareTech(a.tech, b.tech, isAsc);
+          return compareTech(a.technology, b.technology, isAsc);
         case 'total_ideas':
           return compare(a.total_ideas, b.total_ideas, isAsc);
         case 'curr_manpower':
-          return compare(a.curr_manpower, b.curr_manpower, isAsc);
+          return compare(a.current_manpower, b.current_manpower, isAsc);
         case 'max_manpower':
           return compare(a.max_manpower, b.max_manpower, isAsc);
         case 'avg_monarch':
-          return compareWithBreaks(a.avg_monarch, b.avg_monarch, isAsc);
+          return compareTotal(a.average_monarch, b.average_monarch, isAsc);
         case 'income':
           return compare(a.income, b.income, isAsc);
         case 'provinces':
-          return compare(a.provinces, b.provinces, isAsc);
+          return compare(a.number_provinces, b.number_provinces, isAsc);
         case 'num_buildings':
-          return compare(a.num_buildings, b.num_buildings, isAsc);
+          return compare(a.number_buildings, b.number_buildings, isAsc);
         case 'buildings_value':
           return compare(a.buildings_value, b.buildings_value, isAsc);
         case 'buildings_per_province':
           return compare(a.buildings_per_province, b.buildings_per_province, isAsc);
         case 'inno':
-          return compare(a.inno, b.inno, isAsc);
+          return compare(a.innovativeness, b.innovativeness, isAsc);
         case 'absolutism':
           return compare(a.absolutism, b.absolutism, isAsc);
         case 'avg_dev':
-          return compare(a.avg_dev, b.avg_dev, isAsc);
+          return compare(a.average_development, b.average_development, isAsc);
         case 'avg_dev_real':
-          return compare(a.avg_dev_real, b.avg_dev_real, isAsc);
+          return compare(a.average_development_real, b.average_development_real, isAsc);
         case 'army_professionalism':
           return compare(a.army_professionalism, b.army_professionalism, isAsc);
         case 'player':
@@ -127,37 +132,39 @@ export class AppComponent implements AfterViewInit {
       }
     });
     this.filteredCountries = data.filter((x: any) => (
-      x.player != '' || !this.filter.player));
+      x.player != null || !this.filter.player));
     this.dataSource = new MatTableDataSource<Country>(this.filteredCountries);
     this.dataSource.paginator = this.paginator;
   }
 }
 
-function compare(a: Number | String, b: Number | String, isAsc: boolean) {
+function compare(a: number | string | null, b: number | string | null, isAsc: boolean) {
+  if (a === null) {
+    return isAsc ? 1 : -1;
+  }
+  if (b === null) {
+    return isAsc ? -1 : 1;
+  }
   return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
 }
 
-function compareWithBreaks(a: String, b: String, isAsc: boolean) {
-  const aIndex = a.indexOf('<br>');
-  const bIndex = b.indexOf('<br>');
-  const aValue = parseFloat(a.substring(0, aIndex));
-  const bValue = parseFloat(b.substring(0, bIndex));
-  return (aValue < bValue ? -1 : 1) * (isAsc ? 1 : -1);
+function compareTotal(a: number[], b: number[], isAsc: boolean) {
+  const aValue = a[0] + a[1] + a[2];
+  const bValue = b[0] + b[1] + b[2];
+  return (aValue < bValue ? -1 : 1) * (isAsc ? 1 : -1); 
 }
 
-function compareTech(a: String, b: String, isAsc: boolean) {
-  const aTechs = a.split('/');
-  const bTechs = b.split('/');
-  const aValue = parseInt(aTechs[0]) + parseInt(aTechs[1]) + parseInt(aTechs[2]);
-  const bValue = parseInt(bTechs[0]) + parseInt(bTechs[1]) + parseInt(bTechs[2]);
+function compareTech(a: number[], b: number[], isAsc: boolean) {
+  const aValue = a[0] + a[1] + a[2];
+  const bValue = b[0] + b[1] + b[2];
   if (aValue != bValue) {
     return (aValue < bValue ? -1 : 1) * (isAsc ? 1 : -1);
   }
-  if (aTechs[0] != bTechs[0]) {
-    return (parseInt(aTechs[0]) < parseInt(bTechs[0]) ? -1 : 1) * (isAsc ? 1 : -1);
+  if (a[0] != b[0]) {
+    return (a[0] < b[0] ? -1 : 1) * (isAsc ? 1 : -1);
   }
-  if (aTechs[1] != bTechs[1]) {
-    return (parseInt(aTechs[1]) < parseInt(bTechs[1]) ? -1 : 1) * (isAsc ? 1 : -1);
+  if (a[1] != b[1]) {
+    return (a[1] < b[1] ? -1 : 1) * (isAsc ? 1 : -1);
   }
-  return (parseInt(aTechs[2]) < parseInt(bTechs[2]) ? -1 : 1) * (isAsc ? 1 : -1);
+  return (a[2] < b[2] ? -1 : 1) * (isAsc ? 1 : -1);
 }
