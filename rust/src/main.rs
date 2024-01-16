@@ -1,3 +1,5 @@
+mod models;
+
 use log::{error, info, trace};
 use std::cmp::max;
 use std::collections::HashMap;
@@ -7,91 +9,25 @@ use std::fs::File;
 use std::io::{self, BufRead, BufWriter, Write};
 use std::iter::Iterator;
 use std::path::Path;
+use std::result::Result;
 use std::time::Instant;
 
 use eu4save::{CountryTag, Eu4Date, Eu4File, EnvTokens, query::Query};
-use eu4save::models::{Country, Province};
-use jomini::JominiDeserialize;
+use eu4save::models::{Country, GameState, Eu4Save, Province};
 use jomini::common::Date;
 use regex::Regex;
-use serde::ser::{Serialize, SerializeStruct, Serializer};
-
-#[derive(Debug, Clone, JominiDeserialize, Default)]
-#[cfg_attr(feature = "serialize", derive(Serialize))]
-pub struct CondensedCountry {
-    pub tag: String,
-    pub name: String,
-    pub total_development: f32,
-    pub real_development: f32,
-    pub gp_score: i32,
-    pub powers_earned: [i32; 3],
-    pub technology: [i32; 3],
-    pub ideas: Vec<(String, u8)>,
-    pub total_ideas: u8,
-    pub current_manpower: i32,
-    pub max_manpower: i32,
-    pub average_monarch: [f32; 3],
-    pub income: f32,
-    pub number_provinces: i32,
-    pub number_buildings: i32,
-    pub buildings_value: i32,
-    pub buildings_per_province: f32,
-    pub innovativeness: f32,
-    pub absolutism: f32,
-    pub average_development: f32,
-    pub average_development_real: f32,
-    pub player: Option<String>,
-    pub army_professionalism: f32,
-}
-
-impl Serialize for CondensedCountry {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where S: Serializer, {
-        let mut s = serializer.serialize_struct("CondensedCountry", 23)?;
-        s.serialize_field("tag", &self.tag)?;
-        s.serialize_field("name", &self.name)?;
-        s.serialize_field("total_development", &self.total_development)?;
-        s.serialize_field("real_development", &self.real_development)?;
-        s.serialize_field("gp_score", &self.gp_score)?;
-        s.serialize_field("powers_earned", &self.powers_earned)?;
-        s.serialize_field("technology", &self.technology)?;
-        s.serialize_field("ideas", &self.ideas)?;
-        s.serialize_field("total_ideas", &self.total_ideas)?;
-        s.serialize_field("current_manpower", &self.current_manpower)?;
-        s.serialize_field("max_manpower", &self.max_manpower)?;
-        s.serialize_field("average_monarch", &self.average_monarch)?;
-        s.serialize_field("income", &self.income)?;
-        s.serialize_field("number_provinces", &self.number_provinces)?;
-        s.serialize_field("number_buildings", &self.number_buildings)?;
-        s.serialize_field("buildings_value", &self.buildings_value)?;
-        s.serialize_field("buildings_per_province", &self.buildings_per_province)?;
-        s.serialize_field("innovativeness", &self.innovativeness)?;
-        s.serialize_field("absolutism", &self.absolutism)?;
-        s.serialize_field("average_development", &self.average_development)?;
-        s.serialize_field("average_development_real", &self.average_development_real)?;
-        s.serialize_field("player", &self.player)?;
-        s.serialize_field("army_professionalism", &self.army_professionalism)?;
-        s.end()
-    }
-}
-
-#[derive(Debug, Clone, JominiDeserialize, Default)]
-#[cfg_attr(feature = "serialize", derive(Serialize))]
-pub struct Eu4Stats {
-    pub countries: Vec<CondensedCountry>
-}
-
-impl Serialize for Eu4Stats {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where S: Serializer, {
-        let mut s = serializer.serialize_struct("Eu4Stats", 1)?;
-        s.serialize_field("countries", &self.countries)?;
-        s.end()
-    }
-}
 
 fn round_two_digits(f: f32) -> f32 {
     return (f * 100.0).round() / 100.0;
+}
+
+fn parse_save_file<P>(file_name: P) -> Result<Eu4Save, Box<dyn Error>>
+where P: AsRef<Path> {
+    let data = std::fs::read(file_name)?;
+    trace!("Bytes read: {:?}", data.len());
+
+    let file = Eu4File::from_slice(&data)?;
+    return Ok(file.parse_save(&EnvTokens)?);
 }
 
 fn get_avg_monarch(country: &Country, current_date: &Eu4Date) -> [f32; 3] {
@@ -161,18 +97,10 @@ fn get_buildings_value(provinces: &Vec<Province>, tag: &CountryTag, values: &Has
     return buildings_value as i32;
 }
 
-fn generate_stats<P>(file_name: P, localisation_map: HashMap<String, String>) -> Result<Eu4Stats, Box<dyn Error>>
-where P: AsRef<Path>, {
-    trace!("Map: {:?}", localisation_map);
-    let data = std::fs::read(file_name)?;
-    trace!("Bytes read: {:?}", data.len());
-
-    let file = Eu4File::from_slice(&data)?;
-    let save = file.parse_save(&EnvTokens)?;
-
-    let save_query = Query::from_save(save);
-    let players: HashMap<_, _> = save_query.players().into_iter().map(|p| (p.tag, p.name)).collect();
-    info!("Players: {:?}", players);
+fn generate_country_stats(
+    save_query: &Query,
+    country: &Country,
+    tag: &CountryTag) -> Result<models::CondensedCountry, Box<dyn Error>> {
 
     let provinces: Vec<Province> = save_query.save()
                     .game
@@ -228,52 +156,401 @@ where P: AsRef<Path>, {
         ("native_three_sisters_field", 100),
     ]);
 
-    let mut stats: Eu4Stats = Eu4Stats { countries: Vec::new() };
-    let countries = save_query.countries();
-    for country in countries {
-        if country.country.raw_development > 0.0 {
-            trace!("{}: {:?} {:?}", stats.countries.len(), country.id, country.tag);      
-            let country_tag = country.tag.to_string();
-            let country_name = localisation_map.get(&country_tag).unwrap_or(&country_tag).to_string();
-            let num_buildings = get_num_buildings(&provinces, &country.tag);
-            let cc = CondensedCountry {
-                tag: country_tag,
-                name: country_name,
-                total_development: round_two_digits(country.country.raw_development),
-                real_development: round_two_digits(country.country.development),
-                gp_score: country.country.great_power_score.round() as i32,
-                powers_earned: [
-                    country.country.powers[0] + country.country.adm_spent_indexed.iter().map(|t| t.1).sum::<i32>(),
-                    country.country.powers[1] + country.country.dip_spent_indexed.iter().map(|t| t.1).sum::<i32>(),
-                    country.country.powers[2] + country.country.mil_spent_indexed.iter().map(|t| t.1).sum::<i32>(),
-                ],
-                technology: [
-                    country.country.technology.adm_tech as i32,
-                    country.country.technology.dip_tech as i32,
-                    country.country.technology.mil_tech as i32,
-                ],
-                ideas: country.country.active_idea_groups.clone(),
-                total_ideas: country.country.active_idea_groups.clone().iter().map(|i| i.1).sum::<u8>(),
-                current_manpower: country.country.manpower.round() as i32 * 1000,
-                max_manpower: country.country.max_manpower.round() as i32 * 1000,
-                average_monarch: get_avg_monarch(&country.country, &save_query.save().meta.date),
-                income: round_two_digits(country.country.ledger.income.iter().sum::<f32>()),
-                number_provinces: country.country.num_of_cities,
-                number_buildings: num_buildings,
-                buildings_value: get_buildings_value(&provinces, &country.tag, &buildings_values),
-                buildings_per_province: round_two_digits(num_buildings as f32 / country.country.num_of_cities as f32),
-                innovativeness: round_two_digits(country.country.innovativeness),
-                absolutism: round_two_digits(country.country.absolutism),
-                average_development: round_two_digits(country.country.raw_development / country.country.num_of_cities as f32),
-                average_development_real: round_two_digits(country.country.development / country.country.num_of_cities as f32),
-                player: players.get(&country.tag).cloned(),
-                army_professionalism: round_two_digits(country.country.army_professionalism * 100.0),
-            };           
-            stats.countries.push(cc);
+    let num_buildings = get_num_buildings(&provinces, &tag);
+    let cc = models::CondensedCountry {
+        total_development: round_two_digits(country.raw_development),
+        real_development: round_two_digits(country.development),
+        gp_score: country.great_power_score.round() as i32,
+        powers_earned: [
+            country.powers[0] + country.adm_spent_indexed.iter().map(|t| t.1).sum::<i32>(),
+            country.powers[1] + country.dip_spent_indexed.iter().map(|t| t.1).sum::<i32>(),
+            country.powers[2] + country.mil_spent_indexed.iter().map(|t| t.1).sum::<i32>(),
+        ],
+        technology: [
+            country.technology.adm_tech as i32,
+            country.technology.dip_tech as i32,
+            country.technology.mil_tech as i32,
+        ],
+        ideas: country.active_idea_groups.clone(),
+        total_ideas: country.active_idea_groups.clone().iter().map(|i| i.1).sum::<u8>(),
+        current_manpower: country.manpower.round() as i32 * 1000,
+        max_manpower: country.max_manpower.round() as i32 * 1000,
+        average_monarch: get_avg_monarch(&country, &save_query.save().meta.date),
+        income: round_two_digits(country.ledger.income.iter().sum::<f32>()),
+        number_provinces: country.num_of_cities,
+        number_buildings: num_buildings,
+        buildings_value: get_buildings_value(&provinces, &tag, &buildings_values),
+        buildings_per_province: round_two_digits(num_buildings as f32 / country.num_of_cities as f32),
+        innovativeness: round_two_digits(country.innovativeness),
+        absolutism: round_two_digits(country.absolutism),
+        average_development: round_two_digits(country.raw_development / country.num_of_cities as f32),
+        average_development_real: round_two_digits(country.development / country.num_of_cities as f32),
+    };
+
+    Ok(cc)
+}
+
+fn get_discipline(country: &Country) -> f32 {
+    let mut base: f32 = 100.0;
+    // Ideas
+    for (name, amt) in &country.active_idea_groups {
+        if (name.contains("offensive") || name.contains("quality")) && *amt >= 7 {
+            base += 5.0;
         }
     }
-    info!("Number of countries: {}", stats.countries.len());
-    Ok(stats)
+
+    // Policies
+    let policies = &country.active_policies;
+    for policy in policies {
+        if policy.policy.contains("weapon_quality") {
+            base += 5.0;
+        } else if policy.policy.contains("on_our_terms") {
+            base += 2.5;
+        }
+    }
+
+    // Advisor
+    // TBD
+
+    // Monarch
+    let events = &country.history.events;
+    let monarch_events = events.into_iter().filter(|(_k, v)| v.as_monarch().is_some());
+    let last_monarch = &monarch_events.last().unwrap().1;
+    for (personality, _) in &last_monarch.as_monarch().unwrap().personalities {
+        if personality.contains("strict") {
+            base += 5.0;
+        }
+    }
+
+    // Absolutism
+    base += f32::min(country.absolutism, 100.0) / 20.0;
+
+    return base;
+}
+
+fn get_army_morale(country: &Country) -> f32 {
+    // If you're drilling, then lol
+    let mut morale: f32 = 0.0;
+    let armies = &country.armies;
+    for army in armies {
+        let regiments = &army.regiments;
+        for r in regiments {
+            morale = morale.max(r.morale);
+        }
+    }
+    return morale;
+}
+
+fn get_force_limit(country: &Country) -> i32 {
+    // This gets the total number of troops currently, not FL
+    let mut troops: i32 = 0;
+    let armies = &country.armies;
+    for army in armies {
+        let regiments = &army.regiments;
+        troops += regiments.len() as i32;
+    }
+    return troops;
+}
+
+fn get_siege_ability(country: &Country, tag: &CountryTag, gamestate: &GameState) -> f32 {
+    let mut base: f32 = 0.0;
+    // Ideas
+    let ideas = &country.active_idea_groups;
+    for (name, amt) in ideas {
+        if name.contains("offensive") && *amt >= 5 {
+            base += 20.0;
+        } else if name.contains("espionage") && *amt >= 3 {
+            base += 10.0;
+        }
+    }
+
+    // Policies
+    let policies = &country.active_policies;
+    for policy in policies {
+        let p = &policy.policy;
+        if p.contains("word_is_my_bond") || p.contains("fear_tactics") || p.contains("siege_weapons") || p.contains("military_zeal"){
+            base += 10.0;
+        }
+    }
+
+    // War Exhaustion
+    // TBD
+
+    // Army Tradition
+    base += &country.army_tradition / 20.0;
+
+    // Army Professionalism
+    base += &country.army_professionalism / 0.05;
+
+    // Military Hegemon
+    if gamestate.military_hegemon.clone().is_some_and(|h| h.country == *tag && h.progress >= 100.0) {
+        base += 20.0;
+    }
+
+    return base;
+}
+
+fn get_fort_defense(country: &Country) -> f32 {
+    let mut base: f32 = 0.0;
+    // Ideas
+    for (name, amt) in &country.active_idea_groups {
+        if name.contains("defensive") && *amt >= 5 {
+            base += 25.0;
+        }
+    }
+
+    // Policies
+    let policies = &country.active_policies;
+    for policy in policies {
+        let p = &policy.policy;
+        if p.contains("for the people") {
+            base += 25.0;
+        } else if p.contains("privy_council") || p.contains("loyal_conduct") {
+            base += 15.0;
+        } else if p.contains("superior_fortifications") {
+            base += 10.0;
+        }
+    }
+
+    // Power Projection
+    base += &country.current_power_projection / 10.0;
+
+    return base;
+}
+
+fn get_infantry_ca(country: &Country) -> f32 {
+    let mut base: f32 = 0.0;
+    // Ideas
+    for (name, amt) in &country.active_idea_groups {
+        if name.contains("mercenary") && *amt >= 6 {
+            base += 10.0;
+        } else if name.contains("quality") && *amt >= 1 {
+            base += 10.0;
+        }
+    }
+
+    // Policies
+    let policies = &country.active_policies;
+    for policy in policies {
+        let p = &policy.policy;
+        if p.contains("modern_firearm") {
+            base += 15.0;
+        }
+    }
+
+    return base;
+}
+
+fn get_cavalry_ca(country: &Country) -> f32 {
+    let mut base: f32 = 0.0;
+    // Ideas
+    for (name, amt) in &country.active_idea_groups {
+        if name.contains("horde") && *amt >= 7 {
+            base += 25.0;
+        } else if name.contains("aristocratic") && *amt >= 1 {
+            base += 15.0;
+        } else if name.contains("quality") && *amt >= 3 {
+            base += 10.0;
+        }
+    }
+
+    // Policies
+    let policies = &country.active_policies;
+    for policy in policies {
+        let p = &policy.policy;
+        if p.contains("noble_loyalty") || p.contains("psychological") {
+            base += 10.0;
+        }
+    }
+    
+    return base;
+}
+
+fn get_artillery_ca(country: &Country) -> f32 {
+    let mut base: f32 = 0.0;
+    // Ideas
+    for (name, amt) in &country.active_idea_groups {
+        if name.contains("quality") && *amt >= 7 {
+            base += 10.0;
+        }
+    }
+
+    // Policies
+    let policies = &country.active_policies;
+    for policy in policies {
+        let p = &policy.policy;
+        if p.contains("horse_artillery") {
+            base += 10.0;
+        }
+    }
+    
+    return base;
+}
+
+fn get_leader_fire(country: &Country) -> u8 {
+    let mut base: u8 = 0;
+    // Ideas
+    for (name, amt) in &country.active_idea_groups {
+        if name.contains("offensive") && *amt >= 3 {
+            base += 1;
+        }
+    }
+
+    // Policies
+    let policies = &country.active_policies;
+    for policy in policies {
+        let p = &policy.policy;
+        if p.contains("mining_act") {
+            base += 1;
+        }
+    }
+    
+    return base;
+}
+
+fn get_leader_shock(country: &Country) -> u8 {
+    let mut base: u8 = 0;
+    // Ideas
+    for (name, amt) in &country.active_idea_groups {
+        if name.contains("offensive") && *amt >= 1 {
+            base += 1;
+        }
+    }
+
+    // Policies
+    let policies = &country.active_policies;
+    for policy in policies {
+        let p = &policy.policy;
+        if p.contains("inspirational_leaders") {
+            base += 1;
+        }
+    }
+    
+    return base;
+}
+
+fn get_leader_maneuver(country: &Country) -> u8 {
+    let mut base: u8 = 0;
+    // Ideas
+    for (name, amt) in &country.active_idea_groups {
+        if name.contains("defensive") && *amt >= 3 {
+            base += 1;
+        }
+    }
+
+    // Policies
+    let policies = &country.active_policies;
+    for policy in policies {
+        let p = &policy.policy;
+        if p.contains("hired_adventurers") {
+            base += 1;
+        }
+    }
+    
+    return base;
+}
+
+fn get_leader_siege(country: &Country) -> u8 {
+    let mut base: u8 = 0;
+    // Ideas
+    for (name, amt) in &country.active_idea_groups {
+        if name.contains("aristocratic") && *amt >= 7 {
+            base += 1;
+        }
+    }
+
+    // Policies
+    let policies = &country.active_policies;
+    for policy in policies {
+        let p = &policy.policy;
+        if p.contains("modern_siege") {
+            base += 1;
+        }
+    }
+    
+    return base;
+}
+
+fn get_navy_morale(country: &Country) -> f32 {
+    // If you're drilling, then lol
+    let mut morale: f32 = 0.0;
+    let navies = &country.navies;
+    for navy in navies {
+        let ships = &navy.ships;
+        for s in ships {
+            morale = morale.max(s.morale);
+        }
+    }
+    return morale;
+}
+
+fn get_navy_force_limit(country: &Country) -> i32 {
+    // This gets the total number of ships currently, not FL
+    let mut ships: i32 = 0;
+    let navies = &country.navies;
+    for navy in navies {
+        let s = &navy.ships;
+        ships += s.len() as i32;
+    }
+    return ships;
+}
+
+fn get_merc_discipline(country: &Country, tag: &CountryTag, gamestate: &GameState) -> f32 {
+    let mut base: f32 = 100.0;
+    // Ideas
+    for (name, amt) in &country.active_idea_groups {
+        if name.contains("mercenary") && *amt >= 7 {
+            base += 5.0;
+        }
+    }
+
+    // Policies
+    let policies = &country.active_policies;
+    for policy in policies {
+        let p = &policy.policy;
+        if p.contains("mercenary_tactical") {
+            base += 5.0;
+        }
+    }
+
+    // Economic Hegemon
+    let econ = &gamestate.economic_hegemon;
+    if econ.clone().is_some_and(|h| h.country == *tag) {
+        base += econ.clone().unwrap().progress / 10.0;
+    }
+
+    return base;
+}
+
+fn generate_military_stats(
+    save_query: &Query,
+    country: &Country,
+    tag: &CountryTag) -> Result<models::CountryMilitary, Box<dyn Error>> {      
+    let military = models::CountryMilitary {
+        army_tradition: round_two_digits(country.army_tradition),
+        army_morale: round_two_digits(get_army_morale(&country)),
+        army_discipline: round_two_digits(get_discipline(&country)),
+        army_force_limit: get_force_limit(&country),
+        army_professionalism: round_two_digits(country.army_professionalism * 100.0),
+        siege_ability: round_two_digits(get_siege_ability(&country, &tag, &save_query.save().game)),
+        fort_defense: round_two_digits(get_fort_defense(&country)),
+        infantry_ability: get_infantry_ca(&country),
+        cavalry_ability: get_cavalry_ca(&country),
+        artillery_ability: get_artillery_ca(&country),
+        fire_dealt: round_two_digits(country.army_professionalism * 10.0),
+        fire_received: 0.0,
+        shock_dealt: round_two_digits(country.army_professionalism * 10.0),
+        shock_received: 0.0,
+        leader_fire: get_leader_fire(&country), //u8
+        leader_shock: get_leader_shock(&country), //u8
+        leader_maneuver: get_leader_maneuver(&country), //u8
+        leader_siege: get_leader_siege(&country), //u8
+        mercenary_discipline: get_merc_discipline(&country, &tag, &save_query.save().game),
+        naval_tradition: round_two_digits(country.navy_tradition),
+        naval_morale: round_two_digits(get_navy_morale(&country)),
+        naval_force_limit: get_navy_force_limit(&country),    
+    }; 
+    Ok(military)
 }
 
 fn parse_localisation<P>(file_name: P) -> HashMap<String, String>
@@ -295,6 +572,53 @@ where P: AsRef<Path>, {
     Ok(io::BufReader::new(file).lines())
 }
 
+fn get_dev_ratio(mana_spent: [i32; 3]) -> String {
+    let sum: i32 = mana_spent.iter().sum::<i32>();
+    if sum == 0 {
+        return "0/0/0".to_string();
+    }
+    let formatted = format!("{}/{}/{}", mana_spent[0] * 100 / sum, mana_spent[1] * 100 / sum, mana_spent[2] * 100 / sum);
+    return formatted;
+}
+
+fn generate_mana(country: &Country) -> Result<models::CountryMana, Box<dyn Error>> {
+    let spent_dev: [i32; 3] = [
+        country.adm_spent_indexed.iter().filter(|t| t.0 == 7).map(|t| t.1).sum::<i32>(),
+        country.dip_spent_indexed.iter().filter(|t| t.0 == 7).map(|t| t.1).sum::<i32>(),
+        country.mil_spent_indexed.iter().filter(|t| t.0 == 7).map(|t| t.1).sum::<i32>(),
+    ];
+    let mana = models::CountryMana {
+        mana_spent: [
+            country.adm_spent_indexed.iter().map(|t| t.1).sum::<i32>(),
+            country.dip_spent_indexed.iter().map(|t| t.1).sum::<i32>(),
+            country.mil_spent_indexed.iter().map(|t| t.1).sum::<i32>(),
+        ],
+        spent_developing: spent_dev,
+        developing_ratio: get_dev_ratio(spent_dev),
+        spent_tech:
+            country.adm_spent_indexed.iter().filter(|t| t.0 == 1).map(|t| t.1).sum::<i32>() +
+            country.dip_spent_indexed.iter().filter(|t| t.0 == 1).map(|t| t.1).sum::<i32>() +
+            country.mil_spent_indexed.iter().filter(|t| t.0 == 1).map(|t| t.1).sum::<i32>(),
+        spent_culture:
+            country.dip_spent_indexed.iter().filter(|t| [20, 33, 34, 35, 47].contains(&t.0)).map(|t| t.1).sum::<i32>(),
+        spent_coring:
+            country.adm_spent_indexed.iter().filter(|t| t.0 == 17).map(|t| t.1).sum::<i32>(),
+        spent_inflation:
+            country.adm_spent_indexed.iter().filter(|t| t.0 == 15).map(|t| t.1).sum::<i32>(),
+        spent_ideas:
+            country.adm_spent_indexed.iter().filter(|t| t.0 == 0).map(|t| t.1).sum::<i32>() +
+            country.dip_spent_indexed.iter().filter(|t| t.0 == 0).map(|t| t.1).sum::<i32>() +
+            country.mil_spent_indexed.iter().filter(|t| t.0 == 0).map(|t| t.1).sum::<i32>(),
+        spent_force_march:
+            country.mil_spent_indexed.iter().filter(|t| t.0 == 8).map(|t| t.1).sum::<i32>(),
+        spent_generals:
+            country.mil_spent_indexed.iter().filter(|t| [3, 5].contains(&t.0)).map(|t| t.1).sum::<i32>(),
+        spent_unjustified:
+            country.dip_spent_indexed.iter().filter(|t| t.0 == 14).map(|t| t.1).sum::<i32>(), 
+    }; 
+    Ok(mana)
+}
+
 fn main() {
     env_logger::init();
     let args: Vec<String> = env::args().collect();
@@ -302,25 +626,49 @@ fn main() {
 
     let localisation_file = &args[1]; // "anb_countries_l_english.yml"
     let eu4_file_name = &args[2]; // "mp_Silverforge1663_02_06.eu4"
+    let mut stats: models::Eu4Stats = models::Eu4Stats { 
+        countries: Vec::new(),
+    };
+
     let start = Instant::now();
 
     let localisation_map = parse_localisation(localisation_file);
     info!("Finished parsing localisation.");
 
     info!("Reading gamestate from {:?}", eu4_file_name);
-    let eu4stats = match generate_stats(eu4_file_name, localisation_map) {
-        Ok(stats) => stats,
-        Err(e) => {
-            error!("Error: {:?}", e);
-            return;
-        }
-    };
+    let eu4_save = parse_save_file(eu4_file_name).unwrap();
+    let save_query = Query::from_save(eu4_save);
     info!("Finished parsing gamestate.");
 
-    let json_path = Path::new(&eu4_file_name).with_extension("json");
-    let file = File::create(json_path.clone()).unwrap();
+    info!("Generating stats.");
+    let players: HashMap<_, _> = save_query.players().into_iter().map(|p| (p.tag, p.name)).collect();
+    info!("Players: {:?}", players);
+
+    let countries = save_query.countries();
+    for c in countries {
+        let country = c.country;
+        let country_tag = c.tag.to_string();
+        let country_name = localisation_map.get(&country_tag).unwrap_or(&country_tag).to_string();
+        if country.raw_development > 0.0 {
+            trace!("{}: {:?} {:?}", stats.countries.len(), c.id, c.tag); 
+            let country_stats = models::CountryStats {
+                tag: country_tag,
+                name: country_name,
+                player: players.get(&c.tag).cloned(),
+                country: generate_country_stats(&save_query, &country, &c.tag).unwrap(),
+                military: generate_military_stats(&save_query, &country, &c.tag).unwrap(),
+                mana: generate_mana(&country).unwrap(),
+            };
+            stats.countries.push(country_stats);
+        }
+    }
+    info!("Number of countries: {}", stats.countries.len()); 
+    info!("Finished generating stats.");
+
+    let json_path = "parsed_country.json";
+    let file = File::create(json_path).unwrap();
     let mut writer = BufWriter::new(file);
-    let _ = serde_json::to_writer(&mut writer, &eu4stats);
+    let _ = serde_json::to_writer(&mut writer, &stats);
     let _ = match writer.flush() {
         Ok(w) => w,
         Err(e) => {
@@ -328,7 +676,7 @@ fn main() {
             return;
         }
     };
-    info!("Finished writing to {:?}", json_path.clone());
+    info!("Finished writing to {:?}", json_path);
 
     let duration = start.elapsed();
     info!("Time spent parsing: {:?}", duration);

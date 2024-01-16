@@ -4,19 +4,36 @@ body {
   padding: 10px;
 }
 
-.demo-table {
+.country-table {
   width: 100%;
 }
+
+.military-table {
+  width: 100%;
+}
+
+tr.mana-detail-row {
+  height: 0;
+}
+
+tr.mana-row:not(.example-expanded-row):hover {
+  background: whitesmoke;
+}
+
+tr.mana-row:not(.example-expanded-row):active {
+  background: #efefef;
+}
+
 
 .mat-column-country_name {
   font-weight: bold;
 }
 
-.mat-mdc-row:nth-child(odd) {
+.mat-mdc-row:nth-child(4n) {
   background-color: #FFFFFF;
 }
 
-.mat-mdc-row:nth-child(even) {
+.mat-mdc-row:nth-child(4n + 3) {
   background-color: #EEE;
 }
 
@@ -28,3 +45,14 @@ body {
 .td:first-child {
     position: sticky;
 }
+
+img {
+  margin: auto;
+  display: block;
+}
+
+.mana-detail {
+  overflow: hidden;
+  display: flex;
+}
+
