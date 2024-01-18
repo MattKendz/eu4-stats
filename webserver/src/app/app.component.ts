@@ -3,6 +3,7 @@ import { AfterViewInit, Component, ViewChild, OnInit } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatIconModule } from '@angular/material/icon'
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -38,6 +39,7 @@ interface Country {
   max_manpower: number;
   average_monarch: number[];
   income: number;
+  income_history: number[][];
   number_provinces: number;
   number_buildings: number;
   buildings_value: number;
@@ -87,10 +89,6 @@ interface Mana {
   spent_unjustified: number;
 }
 
-interface Chart {
-  test: string;
-}
-
 interface Dev {
   data: number[];
 }
@@ -105,22 +103,28 @@ interface Dev {
       state('expanded', style({height: '*'})),
       transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
     ]),
+    trigger('detailIncome', [
+      state('collapsed', style({height: '0px', minHeight: '0'})),
+      state('expanded', style({height: '*'})),
+      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+    ]),
   ],
-  imports: [CommonModule, NgOptimizedImage, FormsModule, RouterModule, MatCheckboxModule, MatTabsModule, MatTableModule, MatSortModule, MatPaginatorModule, NgChartsModule],
+  imports: [CommonModule, NgOptimizedImage, FormsModule, RouterModule, MatCheckboxModule, MatIconModule, MatTabsModule, MatTableModule, MatSortModule, MatPaginatorModule, NgChartsModule],
   standalone: true,
 })
 
 export class AppComponent implements AfterViewInit {
   name = 'Angular';
-  countryColumns: string[] = ['country_flag', 'country_name', 'total_dev', 'real_dev', 'gp_score', 'total_mana', 'tech', 'total_ideas', 'curr_manpower', 'max_manpower', 'avg_monarch', 'income', 'provinces', 'num_buildings', 'buildings_value', 'buildings_per_province', 'inno', 'absolutism', 'avg_dev', 'avg_dev_real', 'player'];
-  militaryColumns: string[] = ['military_flag', 'military_name', 'army_tradition', 'army_morale', 'army_discipline', 'army_force_limit', 'army_professionalism', 'siege_ability', 'fort_defense', 'infantry_ability', 'cavalry_ability', 'artillery_ability', 'fire_dealt', 'shock_dealt', 'leader_fire', 'leader_shock', 'leader_maneuver', 'leader_siege', 'mercenary_discipline', 'naval_tradition', 'naval_morale', 'naval_force_limit'];
-  manaColumns: string[] = ['mana_flag', 'mana_name', 'mana_spent', 'spent_developing', 'developing_ratio', 'spent_tech', 'spent_culture', 'spent_coring', 'spent_inflation', 'spent_ideas', 'spent_force_march', 'spent_generals', 'spent_unjustified'];
+  countryColumns: string[] = ['country_flag', 'country_name', 'total_dev', 'real_dev', 'gp_score', 'total_mana', 'tech', 'total_ideas', 'curr_manpower', 'max_manpower', 'avg_monarch', 'income', 'income_history', 'provinces', 'num_buildings', 'buildings_value', 'buildings_per_province', 'inno', 'absolutism', 'avg_dev', 'avg_dev_real', 'player'];
+  militaryColumns: string[] = ['military_flag', 'country_name', 'army_tradition', 'army_morale', 'army_discipline', 'army_force_limit', 'army_professionalism', 'siege_ability', 'fort_defense', 'infantry_ability', 'cavalry_ability', 'artillery_ability', 'fire_dealt', 'shock_dealt', 'leader_fire', 'leader_shock', 'leader_maneuver', 'leader_siege', 'mercenary_discipline', 'naval_tradition', 'naval_morale', 'naval_force_limit', 'player'];
+  manaColumns: string[] = ['mana_flag', 'country_name', 'mana_spent', 'icon', 'spent_developing', 'developing_ratio', 'spent_tech', 'spent_culture', 'spent_coring', 'spent_inflation', 'spent_ideas', 'spent_force_march', 'spent_generals', 'spent_unjustified', 'player'];
   
   filterCountry = {player: false};
   filteredCountries: CountryStats[] = [];
   countries: CountryStats[] = stats.countries;
   dataSource = new MatTableDataSource<CountryStats>(this.countries);
-  expandedElement: Chart | null;
+  expandedPie: boolean | null;
+  expandedIncome: boolean | null;
 
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -130,28 +134,32 @@ export class AppComponent implements AfterViewInit {
   };
   public pieChartLabels = ['Admin', 'Diplo', 'Military'];
   public pieChartDatasets: Dev[] = [];
-  public pieChartLegend = true;
-  public pieChartPlugins = [];
+
+  public incomeChartOptions: ChartOptions<'line'> = {};
+  public incomeChartDatasets: any[] = [];
+  public incomeChartLabels: number[] = [];
 
   public constructor(private titleService: Title) {
     this.titleService.setTitle("EU4 Stats");
+    this.sortCountries({active: 'total_dev', direction: 'desc'});
   }
 
-  ngAfterViewInit() {
+  ngAfterViewInit() {  
     this.filteredCountries = this.countries.filter((x: any) => (
       x.player != '' || !this.filterCountry.player));
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
+    this.expandedPie = null;
+    this.expandedIncome = null;
   }
 
   filterCountryChange() {
-    this.filteredCountries = this.countries.filter((x: any) => (
-      x.player != null || !this.filterCountry.player));
-    this.dataSource = new MatTableDataSource<CountryStats>(this.filteredCountries);
-    this.dataSource.paginator = this.paginator;
+    this.sortCountries(this.sort);
   }
 
   sortCountries(sort: Sort) {
+    this.expandedPie = null;
+    this.expandedIncome = null;
     const data = this.countries.slice();
     if (!sort.active || sort.direction === '') {
       this.countries = data;
@@ -214,6 +222,8 @@ export class AppComponent implements AfterViewInit {
   }
 
   sortMilitaries(sort: Sort) {
+    this.expandedPie = null;
+    this.expandedIncome = null;
     const data = this.countries.slice();
     if (!sort.active || sort.direction === '') {
       this.countries = data;
@@ -225,7 +235,7 @@ export class AppComponent implements AfterViewInit {
       const a = x.military;
       const b = y.military;
       switch (sort.active) {
-        case 'military_name':
+        case 'country_name':
           return compare(x.name, y.name, isAsc);
         case 'army_tradition':
           return compare(a.army_tradition, b.army_tradition, isAsc);
@@ -280,6 +290,8 @@ export class AppComponent implements AfterViewInit {
   }
 
   sortMana(sort: Sort) {
+    this.expandedPie = null;
+    this.expandedIncome = null;
     const data = this.countries.slice();
     if (!sort.active || sort.direction === '') {
       this.countries = data;
@@ -291,7 +303,7 @@ export class AppComponent implements AfterViewInit {
       const a = x.mana;
       const b = y.mana;
       switch (sort.active) {
-        case 'mana_name':
+        case 'country_name':
           return compare(x.name, y.name, isAsc);
         case 'mana_spent':
           return compareTotal(a.mana_spent, b.mana_spent, isAsc);
@@ -327,6 +339,38 @@ export class AppComponent implements AfterViewInit {
 
   changePieData(c: CountryStats) {
     this.pieChartDatasets = [{data: c.mana.spent_developing}];
+  }
+
+  changeIncomeData(c: CountryStats) {
+    let x: number[] = [];
+    let y: number[] = [];
+
+    c.country.income_history.forEach((i) => {
+      x.push(i[0]);
+      y.push(i[1] / 12);
+    })
+    this.incomeChartDatasets = [{
+      label: 'Monthly Income',
+      data: y,
+      borderColor: 'rgb(0, 128, 0)',
+      pointBackgroundColor: 'rgb(0, 128, 0)',
+      pointBorderColor: 'rgb(0, 128, 0)',
+      pointHitRadius: 5,
+      pointRadius: 0,
+    }];
+    this.incomeChartLabels = x;
+    this.incomeChartOptions = {
+      responsive: false,
+      scales: {
+        x: {
+          min: x[0],
+          max: x[x.length - 1],
+        },
+        y: {
+          beginAtZero: true,
+        },
+      },
+    };
   }
 }
 

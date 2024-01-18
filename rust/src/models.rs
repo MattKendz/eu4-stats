@@ -15,6 +15,7 @@ pub struct CondensedCountry {
     pub max_manpower: i32,
     pub average_monarch: [f32; 3],
     pub income: f32,
+    pub income_history: Box<[(u16, i32)]>,
     pub number_provinces: i32,
     pub number_buildings: i32,
     pub buildings_value: i32,
@@ -28,7 +29,7 @@ pub struct CondensedCountry {
 impl Serialize for CondensedCountry {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where S: Serializer, {
-        let mut s = serializer.serialize_struct("CondensedCountry", 19)?;
+        let mut s = serializer.serialize_struct("CondensedCountry", 20)?;
         s.serialize_field("total_development", &self.total_development)?;
         s.serialize_field("real_development", &self.real_development)?;
         s.serialize_field("gp_score", &self.gp_score)?;
@@ -40,6 +41,7 @@ impl Serialize for CondensedCountry {
         s.serialize_field("max_manpower", &self.max_manpower)?;
         s.serialize_field("average_monarch", &self.average_monarch)?;
         s.serialize_field("income", &self.income)?;
+        s.serialize_field("income_history", &self.income_history)?;
         s.serialize_field("number_provinces", &self.number_provinces)?;
         s.serialize_field("number_buildings", &self.number_buildings)?;
         s.serialize_field("buildings_value", &self.buildings_value)?;

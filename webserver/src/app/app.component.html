@@ -1,335 +1,368 @@
+<head>
+ <link href="/assets/fontawesome/css/fontawesome.css" rel="stylesheet">
+ <link href="/assets/fontawesome/css/duotone.css" rel="stylesheet">
+ <link href="/assets/fontawesome/css/solid.css" rel="stylesheet">
+</head>
 <mat-tab-group>
 <mat-tab label="Overview">
-<mat-checkbox class="player-checkbox" [(ngModel)]="filterCountry.player" (ngModelChange)="filterCountryChange()"> Filter Players Only </mat-checkbox>
-<table mat-table matSort (matSortChange)="sortCountries($event)" matSortActive="total_dev" matSortDirection="desc" matSortStart="desc" matSortDisableClear [dataSource]="dataSource" class="mat-elevation-z8 overview-table">  
-  <ng-container matColumnDef="country_flag" sticky>
-    <th mat-header-cell *matHeaderCellDef> Flag </th>
-    <td mat-cell *matCellDef="let c"><img src="./assets/flags/{{c.tag}}.png" alt="{{c.tag}}" width="50" height="50"></td>
-  </ng-container>
+<mat-checkbox class="player-checkbox" [(ngModel)]="filterCountry.player" (ngModelChange)="filterCountryChange()">Filter Players Only</mat-checkbox>
+<table mat-table matSort (matSortChange)="sortCountries($event)" matSortActive="total_dev" matSortDirection="desc" matSortStart="desc" matSortDisableClear [dataSource]="dataSource" class="mat-elevation-z8 overview-table" multiTemplateDataRows> 
+ <ng-container matColumnDef="country_flag" sticky>
+   <th mat-header-cell *matHeaderCellDef>Flag</th>
+   <td mat-cell *matCellDef="let c"><img src="./assets/flags/{{c.tag}}.png" alt="{{c.tag}}" width="50" height="50"></td>
+ </ng-container>
   
-  <ng-container matColumnDef="country_name" sticky>
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
-    <td mat-cell *matCellDef="let c"> {{c.name}} </td>
-  </ng-container>
+ <ng-container matColumnDef="country_name" sticky>
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+   <td mat-cell *matCellDef="let c">{{c.name}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="total_dev">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Total Dev </th>
-    <td mat-cell *matCellDef="let c"> {{c.country.total_development}} </td>
-  </ng-container>
+ <ng-container matColumnDef="total_dev">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Total Dev</th>
+   <td mat-cell *matCellDef="let c">{{c.country.total_development}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="real_dev">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Real Dev </th>
-    <td mat-cell *matCellDef="let c"> {{c.country.real_development}} </td>
-  </ng-container>
+ <ng-container matColumnDef="real_dev">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Real Dev</th>
+   <td mat-cell *matCellDef="let c">{{c.country.real_development}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="gp_score">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> GP Score </th>
-    <td mat-cell *matCellDef="let c"> {{c.country.gp_score}} </td>
-  </ng-container>
+ <ng-container matColumnDef="gp_score">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>GP Score</th>
+   <td mat-cell *matCellDef="let c">{{c.country.gp_score}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="total_mana">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Total Mana Generated </th>
-    <td mat-cell *matCellDef="let c"> {{c.country.powers_earned[0] + c.country.powers_earned[1] + c.country.powers_earned[2]}} <br> {{c.country.powers_earned[0]}}/{{c.country.powers_earned[1]}}/{{c.country.powers_earned[2]}} </td>
-  </ng-container>
+ <ng-container matColumnDef="total_mana">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Total Mana Generated</th>
+   <td mat-cell *matCellDef="let c">{{c.country.powers_earned[0] + c.country.powers_earned[1] + c.country.powers_earned[2]}}<br>{{c.country.powers_earned[0]}}/{{c.country.powers_earned[1]}}/{{c.country.powers_earned[2]}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="tech">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Tech </th>
-    <td mat-cell *matCellDef="let c"> {{c.country.technology[0]}}/{{c.country.technology[1]}}/{{c.country.technology[2]}} </td>
-  </ng-container>
+ <ng-container matColumnDef="tech">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Tech</th>
+   <td mat-cell *matCellDef="let c">{{c.country.technology[0]}}/{{c.country.technology[1]}}/{{c.country.technology[2]}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="total_ideas">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Ideas </th>
-    <td mat-cell *matCellDef="let c"> {{c.country.total_ideas}} </td>
-  </ng-container>
+ <ng-container matColumnDef="total_ideas">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Ideas</th>
+   <td mat-cell *matCellDef="let c">{{c.country.total_ideas}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="curr_manpower">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Current Manpower </th>
-    <td mat-cell *matCellDef="let c"> {{c.country.current_manpower}} </td>
-  </ng-container>
+ <ng-container matColumnDef="curr_manpower">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Current Manpower</th>
+   <td mat-cell *matCellDef="let c">{{c.country.current_manpower}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="max_manpower">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Max Manpower </th>
-    <td mat-cell *matCellDef="let c"> {{c.country.max_manpower}} </td>
-  </ng-container>
+ <ng-container matColumnDef="max_manpower">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Max Manpower</th>
+   <td mat-cell *matCellDef="let c">{{c.country.max_manpower}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="avg_monarch">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Avg. Monarch </th>
-    <td mat-cell *matCellDef="let c"> {{c.country.average_monarch[0] + c.country.average_monarch[1] + c.country.average_monarch[2] | number:'1.2-2'}} <br> {{c.country.average_monarch[0]}}/{{c.country.average_monarch[1]}}/{{c.country.average_monarch[2]}} </td>
-  </ng-container>
+ <ng-container matColumnDef="avg_monarch">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Avg. Monarch</th>
+   <td mat-cell *matCellDef="let c">{{c.country.average_monarch[0] + c.country.average_monarch[1] + c.country.average_monarch[2] | number:'1.2-2'}}<br>{{c.country.average_monarch[0]}}/{{c.country.average_monarch[1]}}/{{c.country.average_monarch[2]}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="income">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Income </th>
-    <td mat-cell *matCellDef="let c"> {{c.country.income}} </td>
-  </ng-container>
+ <ng-container matColumnDef="income">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Income</th>
+   <td mat-cell *matCellDef="let c">{{c.country.income}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="provinces">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Provinces </th>
-    <td mat-cell *matCellDef="let c"> {{c.country.number_provinces}} </td>
-  </ng-container>
+ <ng-container matColumnDef="income_history">
+   <th mat-header-cell *matHeaderCellDef></th>
+   <td mat-cell *matCellDef="let c"><mat-icon class="fad fa-chart-line" (click)="expandedIncome = expandedIncome === c ? null : c; changeIncomeData(c)"></mat-icon></td>
+ </ng-container>
 
-  <ng-container matColumnDef="num_buildings">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Num. Buildings </th>
-    <td mat-cell *matCellDef="let c"> {{c.country.number_buildings}} </td>
-  </ng-container>
+ <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
+ <ng-container matColumnDef="expandedIncome">
+   <td mat-cell *matCellDef="let c" [attr.colspan]="countryColumns.length">
+     <div class="income-detail"
+           [@detailIncome]="c == expandedIncome ? 'expanded' : 'collapsed'">
+       <div class="income-diagram">
+         <canvas width="800" height="400" baseChart
+            [type]="'line'"
+            [datasets]="incomeChartDatasets"
+            [labels]="incomeChartLabels"
+            [options]="incomeChartOptions"
+            [legend]="false">
+         </canvas>
+       </div>
+     </div>
+  </td>
+ </ng-container>
 
-  <ng-container matColumnDef="buildings_value">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Buildings Value </th>
-    <td mat-cell *matCellDef="let c"> {{c.country.buildings_value}} </td>
-  </ng-container>
+ <ng-container matColumnDef="provinces">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Provinces</th>
+   <td mat-cell *matCellDef="let c">{{c.country.number_provinces}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="buildings_per_province">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Buildings per Province </th>
-    <td mat-cell *matCellDef="let c"> {{c.country.buildings_per_province}} </td>
-  </ng-container>
+ <ng-container matColumnDef="num_buildings">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Num. Buildings</th>
+   <td mat-cell *matCellDef="let c">{{c.country.number_buildings}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="inno">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Innovativeness </th>
-    <td mat-cell *matCellDef="let c"> {{c.country.innovativeness}} </td>
-  </ng-container>
+ <ng-container matColumnDef="buildings_value">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Buildings Value</th>
+   <td mat-cell *matCellDef="let c">{{c.country.buildings_value}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="absolutism">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Absolutism </th>
-    <td mat-cell *matCellDef="let c"> {{c.country.absolutism}} </td>
-  </ng-container>
+ <ng-container matColumnDef="buildings_per_province">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Buildings/ Province</th>
+   <td mat-cell *matCellDef="let c">{{c.country.buildings_per_province}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="avg_dev">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Avg. Dev </th>
-    <td mat-cell *matCellDef="let c"> {{c.country.average_development}} </td>
-  </ng-container>
+ <ng-container matColumnDef="inno">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Inno</th>
+   <td mat-cell *matCellDef="let c">{{c.country.innovativeness}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="avg_dev_real">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Avg. Dev (Real) </th>
-    <td mat-cell *matCellDef="let c"> {{c.country.average_development_real}} </td>
-  </ng-container>
+ <ng-container matColumnDef="absolutism">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Absolutism</th>
+   <td mat-cell *matCellDef="let c">{{c.country.absolutism}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="player">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Player </th>
-    <td mat-cell *matCellDef="let c"> {{c.player}} </td>
-  </ng-container>
+ <ng-container matColumnDef="avg_dev">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Average Dev</th>
+   <td mat-cell *matCellDef="let c">{{c.country.average_development}}</td>
+ </ng-container>
 
-  <tr mat-header-row *matHeaderRowDef="countryColumns; sticky: true"></tr>
-  <tr mat-row *matRowDef="let row; columns: countryColumns;"></tr>
+ <ng-container matColumnDef="avg_dev_real">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Average Dev(real)</th>
+   <td mat-cell *matCellDef="let c">{{c.country.average_development_real}}</td>
+ </ng-container>
+
+ <ng-container matColumnDef="player">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Player</th>
+   <td mat-cell *matCellDef="let c">{{c.player}}</td>
+ </ng-container>
+
+ <tr mat-header-row *matHeaderRowDef="countryColumns; sticky: true"></tr>
+ <tr mat-row *matRowDef="let row; columns: countryColumns;" class="income-row" [class.income-expanded-row]="expandedIncome === row"></tr>
+ <tr mat-row *matRowDef="let row; columns: ['expandedIncome']" class="income-detail-row"></tr>
 </table>
 </mat-tab>
 <mat-tab label="Military">
-<mat-checkbox class="player-checkbox" [(ngModel)]="filterCountry.player" (ngModelChange)="filterCountryChange()"> Filter Players Only </mat-checkbox> 
+<mat-checkbox class="player-checkbox" [(ngModel)]="filterCountry.player" (ngModelChange)="filterCountryChange()">Filter Players Only</mat-checkbox>
 
-<table mat-table matSort (matSortChange)="sortMilitaries($event)" matSortActive="army_force_limit" matSortDirection="desc" matSortStart="desc" matSortDisableClear [dataSource]="dataSource" class="mat-elevation-z8 military-table">  
-  <ng-container matColumnDef="military_flag" sticky>
-    <th mat-header-cell *matHeaderCellDef> Flag </th>
-    <td mat-cell *matCellDef="let c"><img src="./assets/flags/{{c.tag}}.png" alt="{{c.tag}}" width="50" height="50"></td>
-  </ng-container>
+<table mat-table matSort (matSortChange)="sortMilitaries($event)" matSortActive="army_force_limit" matSortDirection="desc" matSortStart="desc" matSortDisableClear [dataSource]="dataSource" class="mat-elevation-z8 military-table" multiTemplateDataRows> 
+ <ng-container matColumnDef="military_flag" sticky>
+   <th mat-header-cell *matHeaderCellDef>Flag</th>
+   <td mat-cell *matCellDef="let c"><img src="./assets/flags/{{c.tag}}.png" alt="{{c.tag}}" width="50" height="50"></td>
+ </ng-container>
   
-  <ng-container matColumnDef="military_name" sticky>
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
-    <td mat-cell *matCellDef="let c"> {{c.name}} </td>
-  </ng-container>
+ <ng-container matColumnDef="country_name" sticky>
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+   <td mat-cell *matCellDef="let c">{{c.name}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="army_tradition">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Army Tradition </th>
-    <td mat-cell *matCellDef="let c"> {{c.military.army_tradition}} </td>
-  </ng-container>
+ <ng-container matColumnDef="army_tradition">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Army Tradition</th>
+   <td mat-cell *matCellDef="let c">{{c.military.army_tradition}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="army_morale">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Army Morale </th>
-    <td mat-cell *matCellDef="let c"> {{c.military.army_morale}} </td>
-  </ng-container>
+ <ng-container matColumnDef="army_morale">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Army Morale</th>
+   <td mat-cell *matCellDef="let c">{{c.military.army_morale}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="army_discipline">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Army Discipline </th>
-    <td mat-cell *matCellDef="let c"> {{c.military.army_discipline}} </td>
-  </ng-container>
+ <ng-container matColumnDef="army_discipline">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Army Discipline</th>
+   <td mat-cell *matCellDef="let c">{{c.military.army_discipline}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="army_force_limit">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Army Size </th>
-    <td mat-cell *matCellDef="let c"> {{c.military.army_force_limit}} </td>
-  </ng-container>
+ <ng-container matColumnDef="army_force_limit">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Army Size</th>
+   <td mat-cell *matCellDef="let c">{{c.military.army_force_limit}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="army_professionalism">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Army Professionalism </th>
-    <td mat-cell *matCellDef="let c"> {{c.military.army_professionalism}} </td>
-  </ng-container>
+ <ng-container matColumnDef="army_professionalism">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Army Professionalism</th>
+   <td mat-cell *matCellDef="let c">{{c.military.army_professionalism}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="siege_ability">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Siege Ability </th>
-    <td mat-cell *matCellDef="let c"> {{c.military.siege_ability}} </td>
-  </ng-container>
+ <ng-container matColumnDef="siege_ability">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Siege Ability</th>
+   <td mat-cell *matCellDef="let c">{{c.military.siege_ability}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="fort_defense">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Fort Defense </th>
-    <td mat-cell *matCellDef="let c"> {{c.military.fort_defense}} </td>
-  </ng-container>
+ <ng-container matColumnDef="fort_defense">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Fort Defense</th>
+   <td mat-cell *matCellDef="let c">{{c.military.fort_defense}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="infantry_ability">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Infantry CA </th>
-    <td mat-cell *matCellDef="let c"> {{c.military.infantry_ability}} </td>
-  </ng-container>
+ <ng-container matColumnDef="infantry_ability">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Infantry CA</th>
+   <td mat-cell *matCellDef="let c">{{c.military.infantry_ability}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="cavalry_ability">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Cavalry CA </th>
-    <td mat-cell *matCellDef="let c"> {{c.military.cavalry_ability}} </td>
-  </ng-container>
+ <ng-container matColumnDef="cavalry_ability">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Cavalry CA</th>
+   <td mat-cell *matCellDef="let c">{{c.military.cavalry_ability}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="artillery_ability">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Artillery CA </th>
-    <td mat-cell *matCellDef="let c"> {{c.military.artillery_ability}} </td>
-  </ng-container>
+ <ng-container matColumnDef="artillery_ability">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Artillery CA</th>
+   <td mat-cell *matCellDef="let c">{{c.military.artillery_ability}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="fire_dealt">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Fire Dealt </th>
-    <td mat-cell *matCellDef="let c"> {{c.military.fire_dealt}} </td>
-  </ng-container>
+ <ng-container matColumnDef="fire_dealt">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Fire Dealt</th>
+   <td mat-cell *matCellDef="let c">{{c.military.fire_dealt}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="shock_dealt">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Shock Dealt </th>
-    <td mat-cell *matCellDef="let c"> {{c.military.shock_dealt}} </td>
-  </ng-container>
+ <ng-container matColumnDef="shock_dealt">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Shock Dealt</th>
+   <td mat-cell *matCellDef="let c">{{c.military.shock_dealt}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="leader_fire">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Leader Fire </th>
-    <td mat-cell *matCellDef="let c"> {{c.military.leader_fire}} </td>
-  </ng-container>
+ <ng-container matColumnDef="leader_fire">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Leader Fire</th>
+   <td mat-cell *matCellDef="let c">{{c.military.leader_fire}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="leader_shock">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Leader Shock </th>
-    <td mat-cell *matCellDef="let c"> {{c.military.leader_shock}} </td>
-  </ng-container>
+ <ng-container matColumnDef="leader_shock">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Leader Shock</th>
+   <td mat-cell *matCellDef="let c">{{c.military.leader_shock}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="leader_maneuver">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Leader Manuever </th>
-    <td mat-cell *matCellDef="let c"> {{c.military.leader_maneuver}} </td>
-  </ng-container>
+ <ng-container matColumnDef="leader_maneuver">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Leader Manuever</th>
+   <td mat-cell *matCellDef="let c">{{c.military.leader_maneuver}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="leader_siege">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Leader Siege </th>
-    <td mat-cell *matCellDef="let c"> {{c.military.leader_siege}} </td>
-  </ng-container>
+ <ng-container matColumnDef="leader_siege">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Leader Siege</th>
+   <td mat-cell *matCellDef="let c">{{c.military.leader_siege}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="mercenary_discipline">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Merc Discipline </th>
-    <td mat-cell *matCellDef="let c"> {{c.military.mercenary_discipline}} </td>
-  </ng-container>
+ <ng-container matColumnDef="mercenary_discipline">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Merc Discipline</th>
+   <td mat-cell *matCellDef="let c">{{c.military.mercenary_discipline}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="naval_tradition">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Naval Tradition </th>
-    <td mat-cell *matCellDef="let c"> {{c.military.naval_tradition}} </td>
-  </ng-container>
+ <ng-container matColumnDef="naval_tradition">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Naval Tradition</th>
+   <td mat-cell *matCellDef="let c">{{c.military.naval_tradition}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="naval_morale">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Naval Morale </th>
-    <td mat-cell *matCellDef="let c"> {{c.military.naval_morale}} </td>
-  </ng-container>
+ <ng-container matColumnDef="naval_morale">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Naval Morale</th>
+   <td mat-cell *matCellDef="let c">{{c.military.naval_morale}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="naval_force_limit">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Naval Size </th>
-    <td mat-cell *matCellDef="let c"> {{c.military.naval_force_limit}} </td>
-  </ng-container>
+ <ng-container matColumnDef="naval_force_limit">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Naval Size</th>
+   <td mat-cell *matCellDef="let c">{{c.military.naval_force_limit}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="player">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Player </th>
-    <td mat-cell *matCellDef="let c"> {{c.player}} </td>
-  </ng-container>
+ <ng-container matColumnDef="player">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Player</th>
+   <td mat-cell *matCellDef="let c">{{c.player}}</td>
+ </ng-container>
   
-  <tr mat-header-row *matHeaderRowDef="militaryColumns; sticky: true"></tr>
-  <tr mat-row *matRowDef="let row; columns: militaryColumns;"></tr>
+ <tr mat-header-row *matHeaderRowDef="militaryColumns; sticky: true"></tr>
+ <tr mat-row *matRowDef="let row; columns: militaryColumns;"></tr>
 </table>
 </mat-tab>
 <mat-tab label="Mana Usage">
-<mat-checkbox class="player-checkbox" [(ngModel)]="filterCountry.player" (ngModelChange)="filterCountryChange()"> Filter Players Only </mat-checkbox> 
+<mat-checkbox class="player-checkbox" [(ngModel)]="filterCountry.player" (ngModelChange)="filterCountryChange()">Filter Players Only</mat-checkbox>
 
-<table mat-table matSort multiTemplateDataRows (matSortChange)="sortMana($event)" matSortActive="mana_spent" matSortDirection="desc" matSortStart="desc" matSortDisableClear [dataSource]="dataSource" class="mat-elevation-z8 mana-table">  
-  <ng-container matColumnDef="mana_flag" sticky>
-    <th mat-header-cell *matHeaderCellDef> Flag </th>
-    <td mat-cell *matCellDef="let c" (click)="changePieData(c)"><img src="./assets/flags/{{c.tag}}.png" alt="{{c.tag}}" width="50" height="50"></td>
-  </ng-container>
+<table mat-table matSort multiTemplateDataRows (matSortChange)="sortMana($event)" matSortActive="mana_spent" matSortDirection="desc" matSortStart="desc" matSortDisableClear [dataSource]="dataSource" class="mat-elevation-z8 mana-table"> 
+ <ng-container matColumnDef="mana_flag" sticky>
+   <th mat-header-cell *matHeaderCellDef>Flag</th>
+   <td mat-cell *matCellDef="let c"><img src="./assets/flags/{{c.tag}}.png" alt="{{c.tag}}" width="50" height="50"></td>
+ </ng-container>
   
-  <ng-container matColumnDef="mana_name" sticky>
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Name </th>
-    <td mat-cell *matCellDef="let c" (click)="changePieData(c)"> {{c.name}} </td>
-  </ng-container>
+ <ng-container matColumnDef="country_name" sticky>
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+   <td mat-cell *matCellDef="let c">{{c.name}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="mana_spent">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Mana Spent </th>
-    <td mat-cell *matCellDef="let c" (click)="changePieData(c)"> {{c.mana.mana_spent[0] + c.mana.mana_spent[1] + c.mana.mana_spent[2]}}<br>{{c.mana.mana_spent[0]}}/{{c.mana.mana_spent[1]}}/{{c.mana.mana_spent[2]}} </td>
-  </ng-container>
+ <ng-container matColumnDef="mana_spent">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Mana Spent</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.mana_spent[0] + c.mana.mana_spent[1] + c.mana.mana_spent[2]}}<br>{{c.mana.mana_spent[0]}}/{{c.mana.mana_spent[1]}}/{{c.mana.mana_spent[2]}}</td>
+ </ng-container>
 
-  <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
-  <ng-container matColumnDef="expandedDetail">
-    <td mat-cell *matCellDef="let c" [attr.colspan]="manaColumns.length">
-      <div class="mana-detail"
-           [@detailExpand]="c == expandedElement ? 'expanded' : 'collapsed'">
-        <div class="mana-diagram">
-          <canvas baseChart
+ <ng-container matColumnDef="icon" sticky>
+   <th mat-header-cell *matHeaderCellDef></th>
+   <td mat-cell *matCellDef="let c" (click)="expandedPie = expandedPie === c ? null : c; changePieData(c)"><mat-icon class="fad fa-chart-pie"></mat-icon></td>
+ </ng-container>
+  
+ <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
+ <ng-container matColumnDef="expandedDetail">
+   <td mat-cell *matCellDef="let c" [attr.colspan]="manaColumns.length">
+     <div class="mana-detail"
+           [@detailExpand]="c == expandedPie ? 'expanded' : 'collapsed'">
+       <div class="mana-diagram">
+         <canvas baseChart
             [type]="'pie'"
             [datasets]="pieChartDatasets"
             [labels]="pieChartLabels"
             [options]="pieChartOptions"
-            [plugins]="pieChartPlugins"
-            [legend]="pieChartLegend">
-          </canvas>
-        </div>
-      </div>
-    </td>
-  </ng-container>
+            [legend]="true">
+         </canvas>
+       </div>
+     </div>
+  </td>
+ </ng-container>
 
-  <ng-container matColumnDef="spent_developing">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Deving </th>
-    <td mat-cell *matCellDef="let c" (click)="changePieData(c)"> {{c.mana.spent_developing[0] + c.mana.spent_developing[1] + c.mana.spent_developing[2]}}<br>{{c.mana.spent_developing[0]}}/{{c.mana.spent_developing[1]}}/{{c.mana.spent_developing[2]}} </td>
-  </ng-container>
+ <ng-container matColumnDef="spent_developing">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Deving</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.spent_developing[0] + c.mana.spent_developing[1] + c.mana.spent_developing[2]}}<br>{{c.mana.spent_developing[0]}}/{{c.mana.spent_developing[1]}}/{{c.mana.spent_developing[2]}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="developing_ratio">
-    <th mat-header-cell *matHeaderCellDef> Deving Ratio </th>
-    <td mat-cell *matCellDef="let c" (click)="changePieData(c)"> {{c.mana.developing_ratio}} </td>
-  </ng-container>
+ <ng-container matColumnDef="developing_ratio">
+   <th mat-header-cell *matHeaderCellDef>Deving Ratio</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.developing_ratio}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="spent_tech">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Technology </th>
-    <td mat-cell *matCellDef="let c" (click)="changePieData(c)"> {{c.mana.spent_tech}} </td>
-  </ng-container>
+ <ng-container matColumnDef="spent_tech">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Technology</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.spent_tech}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="spent_culture">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Culture </th>
-    <td mat-cell *matCellDef="let c" (click)="changePieData(c)"> {{c.mana.spent_culture}} </td>
-  </ng-container>
+ <ng-container matColumnDef="spent_culture">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Culture</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.spent_culture}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="spent_coring">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Coring </th>
-    <td mat-cell *matCellDef="let c" (click)="changePieData(c)"> {{c.mana.spent_coring}} </td>
-  </ng-container>
+ <ng-container matColumnDef="spent_coring">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Coring</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.spent_coring}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="spent_inflation">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Inflation </th>
-    <td mat-cell *matCellDef="let c" (click)="changePieData(c)"> {{c.mana.spent_inflation}} </td>
-  </ng-container>
+ <ng-container matColumnDef="spent_inflation">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Inflation</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.spent_inflation}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="spent_ideas">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Ideas </th>
-    <td mat-cell *matCellDef="let c" (click)="changePieData(c)"> {{c.mana.spent_ideas}} </td>
-  </ng-container>
+ <ng-container matColumnDef="spent_ideas">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Ideas</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.spent_ideas}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="spent_force_march">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Forced March </th>
-    <td mat-cell *matCellDef="let c" (click)="changePieData(c)"> {{c.mana.spent_force_march}} </td>
-  </ng-container>
+ <ng-container matColumnDef="spent_force_march">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Forced March</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.spent_force_march}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="spent_generals">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Hiring Generals </th>
-    <td mat-cell *matCellDef="let c" (click)="changePieData(c)"> {{c.mana.spent_generals}} </td>
-  </ng-container>
+ <ng-container matColumnDef="spent_generals">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Hiring Generals</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.spent_generals}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="spent_unjustified">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Unjustified Demands </th>
-    <td mat-cell *matCellDef="let c" (click)="changePieData(c)"> {{c.mana.spent_unjustified}} </td>
-  </ng-container>
+ <ng-container matColumnDef="spent_unjustified">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Unjustified Demands</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.spent_unjustified}}</td>
+ </ng-container>
 
-  <ng-container matColumnDef="player">
-    <th mat-header-cell *matHeaderCellDef mat-sort-header> Player </th>
-    <td mat-cell *matCellDef="let c" (click)="changePieData(c)"> {{c.player}} </td>
-  </ng-container>
+ <ng-container matColumnDef="player">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Player</th>
+   <td mat-cell *matCellDef="let c">{{c.player}}</td>
+ </ng-container>
   
-  <tr mat-header-row *matHeaderRowDef="manaColumns; sticky: true"></tr>
-  <tr mat-row *matRowDef="let row; columns: manaColumns;" class="mana-row" [class.mana-expanded-row]="expandedElement === row" (click)="expandedElement = expandedElement === row ? null : row"></tr>
-  <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="mana-detail-row"></tr>
+ <tr mat-header-row *matHeaderRowDef="manaColumns; sticky: true"></tr>
+ <tr mat-row *matRowDef="let row; columns: manaColumns;" class="mana-row" [class.mana-expanded-row]="expandedPie === row"></tr>
+ <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="mana-detail-row"></tr>
 </table>
 </mat-tab>
 </mat-tab-group>

@@ -4,12 +4,27 @@ body {
   padding: 10px;
 }
 
-.country-table {
-  width: 100%;
+/*td {
+  border-collapse:collapse;
+  border-spacing:0;
+  border-left: 1px solid #e0e0e0;
+  border-right: 1px solid #e0e0e0;
+}*/
+
+tr {
+  text-align: center;
 }
 
-.military-table {
-  width: 100%;
+tr.income-detail-row {
+  height: 0;
+}
+
+tr.income-row:not(.example-expanded-row):hover {
+  background: whitesmoke;
+}
+
+tr.income-row:not(.example-expanded-row):active {
+  background: #efefef;
 }
 
 tr.mana-detail-row {
@@ -24,9 +39,40 @@ tr.mana-row:not(.example-expanded-row):active {
   background: #efefef;
 }
 
+img {
+  margin: auto;
+  display: block;
+}
 
-.mat-column-country_name {
+mat-icon {
+  cursor:pointer;
+}
+
+.country-table {
+  width: 100%;
+}
+
+.military-table {
+  width: 100%;
+}
+
+.mat-column-country_name, .mat-column-player {
   font-weight: bold;
+}
+
+.mat-column-income_history {
+  border-collapse:collapse;
+  border-spacing:0;
+  width: 0px;
+  white-space: nowrap;
+}
+
+.military-table .mat-mdc-row:nth-child(odd) {
+  background-color: #FFFFFF;
+}
+
+.military-table .mat-mdc-row:nth-child(even) {
+  background-color: #EEE;
 }
 
 .mat-mdc-row:nth-child(4n) {
@@ -46,13 +92,15 @@ tr.mana-row:not(.example-expanded-row):active {
     position: sticky;
 }
 
-img {
-  margin: auto;
-  display: block;
-}
-
 .mana-detail {
   overflow: hidden;
   display: flex;
 }
+
+.income-detail {
+  overflow: hidden;
+  display: flex;
+}
+
+
 
