@@ -12,7 +12,7 @@ use std::path::Path;
 use std::result::Result;
 use std::time::Instant;
 
-use eu4save::{CountryTag, Eu4Date, Eu4File, EnvTokens, query::Query};
+use eu4save::{CountryTag, Eu4Date, Eu4File, EnvTokens, query::Query, query::CountryIncomeLedger};
 use eu4save::models::{Country, GameState, Eu4Save, Province};
 use jomini::common::Date;
 use regex::Regex;
@@ -97,6 +97,26 @@ fn get_buildings_value(provinces: &Vec<Province>, tag: &CountryTag, values: &Has
     return buildings_value as i32;
 }
 
+fn get_income(ledger: &CountryIncomeLedger) -> f32 {
+    return ledger.taxation +
+        ledger.production +
+        ledger.trade +
+        ledger.gold +
+        ledger.tariffs +
+        ledger.vassals +
+        ledger.harbor_fees +
+        ledger.subsidies +
+        ledger.war_reparations +
+        ledger.interest +
+        ledger.spoils_of_war +
+        ledger.siphoning_income +
+        ledger.condottieri +
+        ledger.knowledge_sharing +
+        ledger.blockading_foreign_ports +
+        ledger.looting_foreign_cities +
+        ledger.other;
+}
+
 fn generate_country_stats(
     save_query: &Query,
     country: &Country,
@@ -176,7 +196,7 @@ fn generate_country_stats(
         current_manpower: country.manpower.round() as i32 * 1000,
         max_manpower: country.max_manpower.round() as i32 * 1000,
         average_monarch: get_avg_monarch(&country, &save_query.save().meta.date),
-        income: round_two_digits(country.ledger.income.iter().sum::<f32>() - save_query.country_income_breakdown(country).events),
+        income: round_two_digits(get_income(&save_query.country_income_breakdown(country))),
         income_history: save_query.save().game.income_statistics.ledger.clone().into_iter().filter(|d| d.name == *tag).map(|d| d.data).collect::<Vec<_>>()[0].clone().into(),
         number_provinces: country.num_of_cities,
         number_buildings: num_buildings,
