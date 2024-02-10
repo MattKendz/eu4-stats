@@ -13,6 +13,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { NgChartsModule } from 'ng2-charts';
 import { ChartOptions } from 'chart.js';
 import * as stats from '../assets/parsed_country.json';
+import * as old_stats from '../assets/old_parsed_country.json';
 
 interface Eu4Stats {
   countries: CountryStats[];
@@ -93,6 +94,14 @@ interface Dev {
   data: number[];
 }
 
+interface Delta {
+  tag: string;
+  name: string;
+  player: string | null;
+  country: Country;
+  old_country: Country | null;
+}
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -122,7 +131,9 @@ export class AppComponent implements AfterViewInit {
   filterCountry = {player: false};
   filteredCountries: CountryStats[] = [];
   countries: CountryStats[] = stats.countries;
+  delta: Delta[] = this.loadDelta();
   dataSource = new MatTableDataSource<CountryStats>(this.countries);
+  deltaDataSource = new MatTableDataSource<Delta>(this.delta);
   expandedPie: boolean | null;
   expandedIncome: boolean | null;
 
@@ -335,6 +346,35 @@ export class AppComponent implements AfterViewInit {
       x.player != null || !this.filterCountry.player));
     this.dataSource = new MatTableDataSource<CountryStats>(this.filteredCountries);
     this.dataSource.paginator = this.paginator;
+  }
+
+  loadDelta() {
+    let curr = stats.countries;
+    let old = old_stats.countries;
+    let output: Delta[] = [];
+
+    curr.forEach((i) => {
+      let d: Delta = {
+        tag: i.tag,
+        name: i.name,
+        player: i.player,
+        country: i.country,
+        old_country: this.getOldCountry(old, i.tag)
+      };
+      output.push(d);
+    });
+    
+    return output;
+  }
+
+  getOldCountry(c: CountryStats[], tag: String) {
+    let country = null;
+    c.forEach((i) => {
+      if (i.tag == tag) {
+        country = i.country;
+      }
+    })
+    return country;
   }
 
   changePieData(c: CountryStats) {
