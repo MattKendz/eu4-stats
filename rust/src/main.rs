@@ -174,6 +174,23 @@ fn generate_country_stats(
         ("native_longhouse", 100),
         ("native_great_trail", 100),
         ("native_three_sisters_field", 100),
+        ("leather_workshop", 200),
+        ("cheese_workshop", 200),
+        ("cloth_workshop", 400),
+        ("fur_workshop", 400),
+        ("wood_workshop", 400),
+        ("cannon_foundry", 600),
+        ("sculpture_workshop", 600),
+        ("spectacle_factory", 600),
+        ("jewellery_workshop", 600),
+        ("munition_factory", 1000),
+        ("metalworking_workshop", 1000),
+        ("uniforms_workshop", 1000),
+        ("early_road", 100),
+        ("gravel_road", 300),
+        ("royal_road", 400),
+        ("dwarven_road", 500),
+        ("railroad", 1000),
     ]);
 
     let num_buildings = get_num_buildings(&provinces, &tag);
