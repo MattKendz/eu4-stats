@@ -59,7 +59,7 @@ fn get_avg_monarch(country: &Country, current_date: &Eu4Date) -> [f32; 3] {
         last_ruler[2] = monarch.mil;
     }
 
-    let days_passed = last_date.days_until(current_date);
+    let days_passed = max(last_date, start_date).days_until(current_date);
     trace!("Adding {} days as {:?}", days_passed, last_ruler);
     for i in 0..3 {
         monarch_power_generated[i] += (days_passed * last_ruler[i] as i32) as f32;
@@ -89,8 +89,10 @@ fn get_buildings_value(provinces: &Vec<Province>, tag: &CountryTag, values: &Has
                             .filter(|p| p.owner.is_some_and(|o| o == *tag));
     let mut buildings_value: i32 = 0;
     for province in country_provinces {
+        // info!("Province: {:?}", province.name);
         let buildings: Vec<String> = province.buildings.clone().into_iter().filter(|(_k, v)| *v).map(|(k, _v)| k).collect();
         for b in buildings {
+            // info!("{:?}", b);
             buildings_value += values.get(&*b).unwrap();
         }
     }
@@ -191,6 +193,10 @@ fn generate_country_stats(
         ("royal_road", 400),
         ("dwarven_road", 500),
         ("railroad", 1000),
+        ("earthwork", 100),
+        ("local_exchange", 100),
+        ("mustering_field", 100),
+        ("warcamp", 200),
     ]);
 
     let num_buildings = get_num_buildings(&provinces, &tag);
