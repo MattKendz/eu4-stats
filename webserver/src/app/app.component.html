@@ -365,6 +365,108 @@
  <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="mana-detail-row"></tr>
 </table>
 </mat-tab>
+<mat-tab label="Delta">
+<mat-checkbox class="player-checkbox" [(ngModel)]="filterCountry.player" (ngModelChange)="filterCountryChange()">Filter Players Only</mat-checkbox>
+
+<table mat-table matSort multiTemplateDataRows (matSortChange)="sortMana($event)" matSortActive="mana_spent" matSortDirection="desc" matSortStart="desc" matSortDisableClear [dataSource]="dataSource" class="mat-elevation-z8 mana-table"> 
+ <ng-container matColumnDef="mana_flag" sticky>
+   <th mat-header-cell *matHeaderCellDef>Flag</th>
+   <td mat-cell *matCellDef="let c"><img src="./assets/flags/{{c.tag}}.png" alt="{{c.tag}}" width="50" height="50"></td>
+ </ng-container>
+  
+ <ng-container matColumnDef="country_name" sticky>
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+   <td mat-cell *matCellDef="let c">{{c.name}}</td>
+ </ng-container>
+
+ <ng-container matColumnDef="mana_spent">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Mana Spent</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.mana_spent[0] + c.mana.mana_spent[1] + c.mana.mana_spent[2]}}<br>{{c.mana.mana_spent[0]}}/{{c.mana.mana_spent[1]}}/{{c.mana.mana_spent[2]}}</td>
+ </ng-container>
+
+ <ng-container matColumnDef="icon" sticky>
+   <th mat-header-cell *matHeaderCellDef></th>
+   <td mat-cell *matCellDef="let c" (click)="expandedPie = expandedPie === c ? null : c; changePieData(c)"><mat-icon class="fad fa-chart-pie"></mat-icon></td>
+ </ng-container>
+  
+ <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
+ <ng-container matColumnDef="expandedDetail">
+   <td mat-cell *matCellDef="let c" [attr.colspan]="manaColumns.length">
+     <div class="mana-detail"
+           [@detailExpand]="c == expandedPie ? 'expanded' : 'collapsed'">
+       <div class="mana-diagram">
+         <canvas baseChart
+            [type]="'pie'"
+            [datasets]="pieChartDatasets"
+            [labels]="pieChartLabels"
+            [options]="pieChartOptions"
+            [legend]="true">
+         </canvas>
+       </div>
+     </div>
+  </td>
+ </ng-container>
+
+ <ng-container matColumnDef="spent_developing">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Deving</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.spent_developing[0] + c.mana.spent_developing[1] + c.mana.spent_developing[2]}}<br>{{c.mana.spent_developing[0]}}/{{c.mana.spent_developing[1]}}/{{c.mana.spent_developing[2]}}</td>
+ </ng-container>
+
+ <ng-container matColumnDef="developing_ratio">
+   <th mat-header-cell *matHeaderCellDef>Deving Ratio</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.developing_ratio}}</td>
+ </ng-container>
+
+ <ng-container matColumnDef="spent_tech">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Technology</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.spent_tech}}</td>
+ </ng-container>
+
+ <ng-container matColumnDef="spent_culture">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Culture</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.spent_culture}}</td>
+ </ng-container>
+
+ <ng-container matColumnDef="spent_coring">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Coring</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.spent_coring}}</td>
+ </ng-container>
+
+ <ng-container matColumnDef="spent_inflation">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Inflation</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.spent_inflation}}</td>
+ </ng-container>
+
+ <ng-container matColumnDef="spent_ideas">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Ideas</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.spent_ideas}}</td>
+ </ng-container>
+
+ <ng-container matColumnDef="spent_force_march">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Forced March</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.spent_force_march}}</td>
+ </ng-container>
+
+ <ng-container matColumnDef="spent_generals">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Hiring Generals</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.spent_generals}}</td>
+ </ng-container>
+
+ <ng-container matColumnDef="spent_unjustified">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Unjustified Demands</th>
+   <td mat-cell *matCellDef="let c">{{c.mana.spent_unjustified}}</td>
+ </ng-container>
+
+ <ng-container matColumnDef="player">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Player</th>
+   <td mat-cell *matCellDef="let c">{{c.player}}</td>
+ </ng-container>
+  
+ <tr mat-header-row *matHeaderRowDef="manaColumns; sticky: true"></tr>
+ <tr mat-row *matRowDef="let row; columns: manaColumns;" class="mana-row" [class.mana-expanded-row]="expandedPie === row"></tr>
+ <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="mana-detail-row"></tr>
+</table>
+</mat-tab>
 </mat-tab-group>
 
 <mat-paginator [pageSizeOptions]="[10, 25, 50, 100]"
