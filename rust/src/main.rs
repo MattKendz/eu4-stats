@@ -93,7 +93,12 @@ fn get_buildings_value(provinces: &Vec<Province>, tag: &CountryTag, values: &Has
         let buildings: Vec<String> = province.buildings.clone().into_iter().filter(|(_k, v)| *v).map(|(k, _v)| k).collect();
         for b in buildings {
             // info!("{:?}", b);
-            buildings_value += values.get(&*b).unwrap();
+            let value = values.get(&*b);
+            if value.is_some() {
+                buildings_value += value.unwrap();
+            } else {
+                error!("Building {:?} does not exist in building map, province {:?}", b, province.name)
+            }
         }
     }
     return buildings_value as i32;
@@ -146,7 +151,7 @@ fn generate_country_stats(
         ("marketplace", 100),
         ("trade_depot", 300),
         ("stock_exchange", 400),
-        ("coastal_defense", 100),
+        ("coastal_defence", 100),
         ("naval_battery", 200),
         ("barracks", 100),
         ("training_fields", 300),
@@ -176,6 +181,7 @@ fn generate_country_stats(
         ("native_longhouse", 100),
         ("native_great_trail", 100),
         ("native_three_sisters_field", 100),
+        ("native_ceremonial_fire_pit", 200),
         ("leather_workshop", 200),
         ("cheese_workshop", 200),
         ("cloth_workshop", 400),
