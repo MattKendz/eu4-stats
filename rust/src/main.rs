@@ -1,6 +1,6 @@
 mod models;
 
-use log::{error, info, trace};
+use log::{error, info, debug};
 use std::cmp::max;
 use std::collections::HashMap;
 use std::env;
@@ -24,7 +24,7 @@ fn round_two_digits(f: f32) -> f32 {
 fn parse_save_file<P>(file_name: P) -> Result<Eu4Save, Box<dyn Error>>
 where P: AsRef<Path> {
     let data = std::fs::read(file_name)?;
-    trace!("Bytes read: {:?}", data.len());
+    debug!("Bytes read: {:?}", data.len());
 
     let file = Eu4File::from_slice(&data)?;
     return Ok(file.parse_save(&EnvTokens)?);
@@ -39,7 +39,7 @@ fn get_avg_monarch(country: &Country, current_date: &Eu4Date) -> [f32; 3] {
     let monarch_events = events.into_iter().filter(|(_k, v)| v.as_monarch().is_some() /*&& start_date.days_until(&k) >= 0*/);
     for (date, e) in monarch_events {
         let monarch = e.as_monarch().unwrap();
-        trace!("{:?}: {} [{}, {}, {}]", date, monarch.name, monarch.adm, monarch.dip, monarch.mil);
+        debug!("{:?}: {} [{}, {}, {}]", date, monarch.name, monarch.adm, monarch.dip, monarch.mil);
         if start_date.days_until(date) <= 0 {
             last_date = *date;
             last_ruler[0] = monarch.adm;
@@ -48,7 +48,7 @@ fn get_avg_monarch(country: &Country, current_date: &Eu4Date) -> [f32; 3] {
             continue;
         }
         let days_passed = max(last_date, start_date).days_until(date);
-        trace!("Adding {} days as {:?}", days_passed, last_ruler);
+        debug!("Adding {} days as {:?}", days_passed, last_ruler);
         for i in 0..3 {
             monarch_power_generated[i] += (days_passed * last_ruler[i] as i32) as f32;
         }
@@ -60,12 +60,12 @@ fn get_avg_monarch(country: &Country, current_date: &Eu4Date) -> [f32; 3] {
     }
 
     let days_passed = max(last_date, start_date).days_until(current_date);
-    trace!("Adding {} days as {:?}", days_passed, last_ruler);
+    debug!("Adding {} days as {:?}", days_passed, last_ruler);
     for i in 0..3 {
         monarch_power_generated[i] += (days_passed * last_ruler[i] as i32) as f32;
         monarch_power_generated[i] /= start_date.days_until(current_date) as f32;
         monarch_power_generated[i] = round_two_digits(monarch_power_generated[i]);
-        trace!("{}: {}", i, monarch_power_generated[i]);
+        debug!("{}: {}", i, monarch_power_generated[i]);
         assert!(monarch_power_generated[i] >= 0.0 && monarch_power_generated[i] <= 6.0);
     }
     
@@ -670,15 +670,21 @@ fn generate_mana(country: &Country) -> Result<models::CountryMana, Box<dyn Error
 }
 
 fn main() {
-    env_logger::init();
     let args: Vec<String> = env::args().collect();
-    assert!(args.len() == 3);
+    assert!(args.len() >= 3);
 
     let localisation_file = &args[1]; // "anb_countries_l_english.yml"
     let eu4_file_name = &args[2]; // "mp_Silverforge1663_02_06.eu4"
     let mut stats: models::Eu4Stats = models::Eu4Stats { 
         countries: Vec::new(),
     };
+    let mut log_level = "info";
+    if args.len() == 4 {
+        log_level = &args[3];
+    }
+
+    std::env::set_var("RUST_LOG", log_level);
+    env_logger::init();
 
     let start = Instant::now();
 
@@ -700,7 +706,7 @@ fn main() {
         let country_tag = c.tag.to_string();
         let country_name = localisation_map.get(&country_tag).unwrap_or(&country_tag).to_string();
         if country.raw_development > 0.0 {
-            trace!("{}: {:?} {:?}", stats.countries.len(), c.id, c.tag); 
+            debug!("{}: {:?} {:?}", stats.countries.len(), c.id, c.tag); 
             let country_stats = models::CountryStats {
                 tag: country_tag,
                 name: country_name,
@@ -710,6 +716,15 @@ fn main() {
                 mana: generate_mana(&country).unwrap(),
             };
             stats.countries.push(country_stats);
+            if players.get(&c.tag).is_some() {
+                // DEBUG ZONE
+                //debug!("{:?}", c.country.flags); // Modifiers
+                //let gov = c.country.government.clone().unwrap();
+                //info!("{:?}", gov.government);
+                //info!("{:?}", gov.reform_stack.reforms);
+                //info!("{:?}", gov.reform_stack.history);
+            }
+
         }
     }
     info!("Number of countries: {}", stats.countries.len()); 
