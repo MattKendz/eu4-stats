@@ -702,6 +702,9 @@ fn main() {
 
     let countries = save_query.countries();
     for c in countries {
+        // if players.get(&c.tag).is_none() {
+        //     continue;
+        // }
         let country = c.country;
         let country_tag = c.tag.to_string();
         let country_name = localisation_map.get(&country_tag).unwrap_or(&country_tag).to_string();
