@@ -1,7 +1,7 @@
 <head>
- <link href="/assets/fontawesome/css/fontawesome.css" rel="stylesheet">
- <link href="/assets/fontawesome/css/duotone.css" rel="stylesheet">
- <link href="/assets/fontawesome/css/solid.css" rel="stylesheet">
+ <link href="/eu4-stats/assets/fontawesome/css/fontawesome.css" rel="stylesheet">
+ <link href="/eu4-stats/assets/fontawesome/css/duotone.css" rel="stylesheet">
+ <link href="/eu4-stats/assets/fontawesome/css/solid.css" rel="stylesheet">
 </head>
 <mat-tab-group>
 <mat-tab label="Overview">
@@ -45,6 +45,11 @@
  <ng-container matColumnDef="total_ideas">
    <th mat-header-cell *matHeaderCellDef mat-sort-header>Ideas</th>
    <td mat-cell *matCellDef="let c">{{c.country.total_ideas}}</td>
+ </ng-container>
+
+ <ng-container matColumnDef="ideas">
+   <th mat-header-cell *matHeaderCellDef mat-sort-header>Idea Groups</th>
+   <td mat-cell *matCellDef="let c">{{c.country.ideas}}</td>
  </ng-container>
 
  <ng-container matColumnDef="curr_manpower">

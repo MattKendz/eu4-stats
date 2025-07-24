@@ -124,7 +124,7 @@ interface Delta {
 
 export class AppComponent implements AfterViewInit {
   name = 'Angular';
-  countryColumns: string[] = ['country_flag', 'country_name', 'total_dev', 'real_dev', 'gp_score', 'total_mana', 'tech', 'total_ideas', 'curr_manpower', 'max_manpower', 'avg_monarch', 'income', 'income_history', 'provinces', 'num_buildings', 'buildings_value', 'buildings_per_province', 'inno', 'absolutism', 'avg_dev', 'avg_dev_real', 'player'];
+  countryColumns: string[] = ['country_flag', 'country_name', 'total_dev', 'real_dev', 'gp_score', 'total_mana', 'tech', 'total_ideas', 'ideas', 'curr_manpower', 'max_manpower', 'avg_monarch', 'income', 'income_history', 'provinces', 'num_buildings', 'buildings_value', 'buildings_per_province', 'inno', 'absolutism', 'avg_dev', 'avg_dev_real', 'player'];
   militaryColumns: string[] = ['military_flag', 'country_name', 'army_tradition', 'army_morale', 'army_discipline', 'army_force_limit', 'army_professionalism', 'siege_ability', 'fort_defense', 'infantry_ability', 'cavalry_ability', 'artillery_ability', 'fire_dealt', 'shock_dealt', 'leader_fire', 'leader_shock', 'leader_maneuver', 'leader_siege', 'mercenary_discipline', 'naval_tradition', 'naval_morale', 'naval_force_limit', 'player'];
   manaColumns: string[] = ['mana_flag', 'country_name', 'mana_spent', 'icon', 'spent_developing', 'developing_ratio', 'spent_tech', 'spent_culture', 'spent_coring', 'spent_inflation', 'spent_ideas', 'spent_force_march', 'spent_generals', 'spent_unjustified', 'player'];
   
@@ -153,6 +153,20 @@ export class AppComponent implements AfterViewInit {
   public constructor(private titleService: Title) {
     this.titleService.setTitle("EU4 Stats");
     this.sortCountries({active: 'total_dev', direction: 'desc'});
+    this.countries.forEach((i) => {
+      let formatted = "";
+      let ideas = i.country.ideas;
+      for (let j = 1; j < ideas.length; j++) {
+        let name = ideas[j][0].slice(0,-6);
+        if (name == "spy") {
+          name = "espionage";
+        }
+        name = name.charAt(0).toUpperCase() + name.slice(1);
+        let icons = "▮".repeat(ideas[j][1]) + "▯".repeat(7-ideas[j][1]);
+        formatted += name + ":\n" + icons + "\n";
+      }
+      i.country.ideas = [formatted.trim()];
+    })
   }
 
   ngAfterViewInit() {  
@@ -195,6 +209,8 @@ export class AppComponent implements AfterViewInit {
         case 'tech':
           return compareTech(a.technology, b.technology, isAsc);
         case 'total_ideas':
+          return compare(a.total_ideas, b.total_ideas, isAsc);
+        case 'ideas':
           return compare(a.total_ideas, b.total_ideas, isAsc);
         case 'curr_manpower':
           return compare(a.current_manpower, b.current_manpower, isAsc);

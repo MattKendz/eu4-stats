@@ -182,6 +182,7 @@ fn generate_country_stats(
         ("native_great_trail", 100),
         ("native_three_sisters_field", 100),
         ("native_ceremonial_fire_pit", 200),
+        ("native_palisade", 200),
         ("leather_workshop", 200),
         ("cheese_workshop", 200),
         ("cloth_workshop", 400),
