@@ -3,6 +3,7 @@
  <link href="/eu4-stats/assets/fontawesome/css/duotone.css" rel="stylesheet">
  <link href="/eu4-stats/assets/fontawesome/css/solid.css" rel="stylesheet">
 </head>
+<mat-progress-bar mode="determinate" value="{{year_progress}}"></mat-progress-bar>
 <mat-tab-group>
 <mat-tab label="Overview">
 <mat-checkbox class="player-checkbox" [(ngModel)]="filterCountry.player" (ngModelChange)="filterCountryChange()">Filter Players Only</mat-checkbox>

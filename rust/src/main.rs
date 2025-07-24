@@ -12,7 +12,7 @@ use std::path::Path;
 use std::result::Result;
 use std::time::Instant;
 
-use eu4save::{CountryTag, Eu4Date, Eu4File, EnvTokens, query::Query, query::CountryIncomeLedger};
+use eu4save::{CountryTag, Eu4Date, Eu4File, EnvTokens, PdsDate, query::Query, query::CountryIncomeLedger};
 use eu4save::models::{Country, GameState, Eu4Save, Province};
 use jomini::common::Date;
 use regex::Regex;
@@ -678,6 +678,7 @@ fn main() {
     let eu4_file_name = &args[2]; // "mp_Silverforge1663_02_06.eu4"
     let mut stats: models::Eu4Stats = models::Eu4Stats { 
         countries: Vec::new(),
+        date: String::new(),
     };
     let mut log_level = "info";
     if args.len() == 4 {
@@ -694,6 +695,8 @@ fn main() {
 
     info!("Reading gamestate from {:?}", eu4_file_name);
     let eu4_save = parse_save_file(eu4_file_name).unwrap();
+    let date = eu4_save.meta.date.iso_8601().to_string();
+    stats.date = date;
     let save_query = Query::from_save(eu4_save);
     info!("Finished parsing gamestate.");
 

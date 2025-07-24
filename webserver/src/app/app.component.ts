@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon'
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { Sort, MatSort, MatSortModule } from '@angular/material/sort';
@@ -17,6 +18,7 @@ import * as old_stats from '../assets/old_parsed_country.json';
 
 interface Eu4Stats {
   countries: CountryStats[];
+  date: string;
 }
 
 interface CountryStats {
@@ -118,7 +120,7 @@ interface Delta {
       transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
     ]),
   ],
-  imports: [CommonModule, NgOptimizedImage, FormsModule, RouterModule, MatCheckboxModule, MatIconModule, MatTabsModule, MatTableModule, MatSortModule, MatPaginatorModule, NgChartsModule],
+  imports: [CommonModule, NgOptimizedImage, FormsModule, RouterModule, MatCheckboxModule, MatIconModule, MatTabsModule, MatTableModule, MatSortModule, MatPaginatorModule, MatProgressBarModule, NgChartsModule],
   standalone: true,
 })
 
@@ -131,6 +133,7 @@ export class AppComponent implements AfterViewInit {
   filterCountry = {player: false};
   filteredCountries: CountryStats[] = [];
   countries: CountryStats[] = stats.countries;
+  year_progress: number = 100.0 * (new Date(stats.date).getFullYear() - 1444) / (1821 - 1444);
   delta: Delta[] = this.loadDelta();
   dataSource = new MatTableDataSource<CountryStats>(this.countries);
   deltaDataSource = new MatTableDataSource<Delta>(this.delta);
@@ -153,6 +156,7 @@ export class AppComponent implements AfterViewInit {
   public constructor(private titleService: Title) {
     this.titleService.setTitle("EU4 Stats");
     this.sortCountries({active: 'total_dev', direction: 'desc'});
+    console.log(this.year_progress);
     this.countries.forEach((i) => {
       let formatted = "";
       let ideas = i.country.ideas;

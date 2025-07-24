@@ -175,13 +175,15 @@ impl Serialize for CountryStats {
 #[cfg_attr(feature = "serialize", derive(Serialize))]
 pub struct Eu4Stats {
     pub countries: Vec<CountryStats>,
+    pub date: String,
 }
 
 impl Serialize for Eu4Stats {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where S: Serializer, {
-        let mut s = serializer.serialize_struct("Eu4Stats", 1)?;
+        let mut s = serializer.serialize_struct("Eu4Stats", 2)?;
         s.serialize_field("countries", &self.countries)?;
+        s.serialize_field("date", &self.date)?;
         s.end()
     }
 }
